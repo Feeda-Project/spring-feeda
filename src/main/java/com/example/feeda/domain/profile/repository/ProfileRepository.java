@@ -9,9 +9,6 @@ public interface ProfileRepository extends JpaRepository<Profile,Long> {
 
     /**
      * 닉네임으로 목록 검색(페이징)
-     * @param nickname
-     * @param pageable
-     * @return
      */
     Page<Profile> findByNicknameContaining(String nickname, Pageable pageable);
 }

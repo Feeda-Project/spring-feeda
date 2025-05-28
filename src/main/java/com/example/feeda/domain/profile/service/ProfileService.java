@@ -23,8 +23,6 @@ public class ProfileService {
 
     /**
      * 프로필 단건 조회 기능
-     * @param accountId
-     * @return
      */
 
     public GetProfileResponseDto getProfileService(Long accountId) {
@@ -42,10 +40,6 @@ public class ProfileService {
 
     /**
      * 프로필 다건 조회 기능(검색,페이징)
-     * @param keyword
-     * @param page
-     * @param size
-     * @return
      */
 
     public ProfileListResponseDto getProfilesService(String keyword, int page, int size) {

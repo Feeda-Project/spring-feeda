@@ -18,9 +18,7 @@ public class ProfileController {
     }
 
     /**
-     * 12
      * 프로필 단건 조회 API
-     * @param accountId
      */
 
     @GetMapping("/profiles/{accountId}")
