@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -38,7 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        String jwt = jwtUtil.substringToken(bearerJwt);
+        String jwt = jwtUtil.extractToken(bearerJwt);
 
         try {
             // JWT 유효성 검사와 claims 추출
@@ -49,12 +50,14 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
             Long userId = jwtUtil.getUserId(jwt);
-            String name = jwtUtil.getName(jwt);
+            String nickName = jwtUtil.getNickName(jwt);
             String email = jwtUtil.getEmail(jwt);
-            JwtPayload payload = new JwtPayload(userId, name, email);
+            JwtPayload payload = new JwtPayload(userId, email, nickName);
 
             // 인증 객체 생성: 사용자 정보(payload), 패스워드(""), 권한 목록(empty)
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(payload, "", List.of());
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                payload, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
+            );
 
             // 인증 정보 등록
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);

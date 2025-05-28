@@ -30,23 +30,22 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String createToken(Long userId, String name, String email) {
+    public String createToken(Long userId, String nickName, String email) {
         Date date = new Date();
 
-        return BEARER_PREFIX +
-                Jwts.builder()
-                        .setSubject(String.valueOf(userId))
-                        .claim("name", name)
-                        .claim("email", email)
-                        .setExpiration(new Date(date.getTime() + TOKEN_TIME))
-                        .setIssuedAt(date) // 발급일
-                        .signWith(key, signatureAlgorithm) // 암호화 알고리즘
-                        .compact();
+        return Jwts.builder()
+                    .setSubject(String.valueOf(userId))
+                    .claim("nickName", nickName)
+                    .claim("email", email)
+                    .setExpiration(new Date(date.getTime() + TOKEN_TIME))
+                    .setIssuedAt(date) // 발급일
+                    .signWith(key, signatureAlgorithm) // 암호화 알고리즘
+                    .compact();
     }
 
-    public String substringToken(String tokenValue) {
+    public String extractToken(String tokenValue) {
         if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
-            return tokenValue.substring(7); // "Bearer " 제거 후 반환
+            return tokenValue.substring(BEARER_PREFIX.length()); // "Bearer " 제거 후 반환
         }
 
         throw new TokenNotFoundException("Not Found Token");
@@ -64,8 +63,8 @@ public class JwtUtil {
         return Long.parseLong(extractClaims(token).getSubject());
     }
 
-    public String getName(String token) {
-        return extractClaims(token).get("name", String.class);
+    public String getNickName(String token) {
+        return extractClaims(token).get("nickName", String.class);
     }
 
     public String getEmail(String token) {
