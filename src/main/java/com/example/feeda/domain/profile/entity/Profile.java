@@ -41,4 +41,10 @@ public class Profile extends BaseEntity {
     public String getBio() {
         return bio;
     }
+
+    public void updateProfile(String nickname, Date birth, String bio) {
+        this.nickname = nickname;
+        this.birth = birth;
+        this.bio = bio;
+    }
 }

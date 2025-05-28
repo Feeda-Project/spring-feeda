@@ -2,13 +2,17 @@ package com.example.feeda.domain.profile.service;
 
 import com.example.feeda.domain.profile.dto.GetProfileResponseDto;
 import com.example.feeda.domain.profile.dto.ProfileListResponseDto;
+import com.example.feeda.domain.profile.dto.UpdateProfileRequestDto;
+import com.example.feeda.domain.profile.dto.UpdateProfileResponseDto;
 import com.example.feeda.domain.profile.entity.Profile;
 import com.example.feeda.domain.profile.repository.ProfileRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -70,5 +74,23 @@ public class ProfileService {
         );
     }
 
+    /**
+     * 프로필 수정 기능
+     */
 
+    public UpdateProfileResponseDto updateProfile(Long accountId, UpdateProfileRequestDto requestDto) {
+
+        Profile profile = profileRepository.findById(accountId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "회원 없음."));
+
+        profile.updateProfile(
+                requestDto.getNickname(),
+                requestDto.getBirth(),
+                requestDto.getBio()
+        );
+
+        profileRepository.save(profile);
+
+        return new UpdateProfileResponseDto("프로필이 성공적으로 수정되었습니다.");
+    }
 }
