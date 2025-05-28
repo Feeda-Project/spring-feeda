@@ -6,3 +6,7 @@ spring:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+
+jwt:
+  secret:
+    key: enfih1329hs9dvalwmEJib31agea3131tgfsahsj6jwaw4gr80gkjsnoefnqldc
