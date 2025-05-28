@@ -26,18 +26,18 @@ public class ProfileService {
      * @param accountId
      * @return
      */
+
     public GetProfileResponseDto getProfileService(Long accountId) {
 
         Profile profile = profileRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
 
-        GetProfileResponseDto responseDto = new GetProfileResponseDto();
-        responseDto.setNickname(profile.getNickname());
-        responseDto.setBirth(profile.getBirth());
-        responseDto.setBio(profile.getBio());
-        responseDto.setAccountId(profile.getAccountId());
-
-        return responseDto;
+        return new GetProfileResponseDto(
+                profile.getAccountId(),
+                profile.getNickname(),
+                profile.getBirth(),
+                profile.getBio()
+        );
     }
 
     /**
@@ -60,14 +60,13 @@ public class ProfileService {
         }
 
         List<GetProfileResponseDto> responseDtoList = profilePage.stream()
-                .map(profile -> {
-            GetProfileResponseDto responseDto = new GetProfileResponseDto();
-            responseDto.setAccountId(profile.getAccountId());
-            responseDto.setNickname(profile.getNickname());
-            responseDto.setBirth(profile.getBirth());
-            responseDto.setBio(profile.getBio());
-            return responseDto;
-        }).toList();
+                .map(profile -> new GetProfileResponseDto(
+                        profile.getAccountId(),
+                        profile.getNickname(),
+                        profile.getBirth(),
+                        profile.getBio()
+                ))
+                .toList();
 
         return new ProfileListResponseDto(
                 responseDtoList,
@@ -76,5 +75,6 @@ public class ProfileService {
                 profilePage.getTotalElements()
         );
     }
+
 
 }

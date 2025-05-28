@@ -23,7 +23,7 @@ public class ProfileController {
      * @param accountId
      */
 
-    @GetMapping("/api/profiles/{accountId}")
+    @GetMapping("/profiles/{accountId}")
     public ResponseEntity<GetProfileResponseDto> getProfileAPI(@PathVariable Long accountId) {
         GetProfileResponseDto responseDto = profileService.getProfileService(accountId);
         return new ResponseEntity<GetProfileResponseDto> (responseDto,HttpStatus.OK);
@@ -32,7 +32,7 @@ public class ProfileController {
      * 프로필 전체 조회 API (검색, 페이징)
      */
 
-    @GetMapping("/api/profiles")
+    @GetMapping("/profiles")
     public ResponseEntity<ProfileListResponseDto> getProfilesAPI(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,

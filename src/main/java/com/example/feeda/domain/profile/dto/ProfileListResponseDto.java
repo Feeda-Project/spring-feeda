@@ -4,17 +4,29 @@ import java.util.List;
 
 public class ProfileListResponseDto {
 
-    private List<GetProfileResponseDto> profiles;
-    private int currentPage;
-    private int totalPages;
-    private long totalItems;
+    // 프로필 리스트
+    private final List<GetProfileResponseDto> profiles;
+
+    // 현재 페이지 번호
+    private final int currentPage;
+
+    // 전체 페이지 수
+    private final int totalPages;
+
+    // 전체 아이템 수
+    private final long totalItems;
+
+
+    protected ProfileListResponseDto() {
+        this.profiles = null;
+        this.currentPage = 0;
+        this.totalPages = 0;
+        this.totalItems = 0;
+    }
 
     /**
-     * JPA에서 기본으로 사용되는 기본 생성자
+     * 모든 필드를 초기화하는 생성자
      */
-
-    public ProfileListResponseDto() {}
-
     public ProfileListResponseDto(List<GetProfileResponseDto> profiles, int currentPage, int totalPages, long totalItems) {
         this.profiles = profiles;
         this.currentPage = currentPage;
@@ -22,38 +34,21 @@ public class ProfileListResponseDto {
         this.totalItems = totalItems;
     }
 
-    // getters & setters
+    // getter 메서드들
 
     public List<GetProfileResponseDto> getProfiles() {
         return profiles;
-    }
-
-    public void setProfiles(List<GetProfileResponseDto> profiles) {
-        this.profiles = profiles;
     }
 
     public int getCurrentPage() {
         return currentPage;
     }
 
-    public void setCurrentPage(int currentPage) {
-        this.currentPage = currentPage;
-    }
-
     public int getTotalPages() {
         return totalPages;
-    }
-
-    public void setTotalPages(int totalPages) {
-        this.totalPages = totalPages;
     }
 
     public long getTotalItems() {
         return totalItems;
     }
-
-    public void setTotalItems(long totalItems) {
-        this.totalItems = totalItems;
-    }
-
 }

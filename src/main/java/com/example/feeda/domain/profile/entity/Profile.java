@@ -21,13 +21,11 @@ public class Profile extends BaseEntity {
     /**
      * JPA에서 기본으로 사용되는 기본 생성자
      */
-    public Profile () {}
 
-    /**
-     *
-     * getter
-     */
+    protected Profile () {}
 
+
+     //getter
     public Long getAccountId() {
         return accountId;
     }

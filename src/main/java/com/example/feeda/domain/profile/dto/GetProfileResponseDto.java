@@ -4,21 +4,31 @@ import java.util.Date;
 
 public class GetProfileResponseDto {
 
-    private Long accountId;
+    // 계정 ID
+    private final Long accountId;
 
-    private String nickname;
+    // 닉네임
+    private final String nickname;
 
-    private Date birth;
+    // 생일
+    private final Date birth;
 
-    private String bio;
+    // 자기소개
+    private final String bio;
 
     /**
-     * JPA에서 기본으로 사용되는 기본 생성자
+     * 모든 필드를 초기화하는 생성자
      */
-    public GetProfileResponseDto() {
+    public GetProfileResponseDto(Long accountId, String nickname, Date birth, String bio) {
+        this.accountId = accountId;
+        this.nickname = nickname;
+        this.birth = birth;
+        this.bio = bio;
     }
 
-    // getter&setter
+    /**
+     * getter 메서드들
+     */
     public Long getAccountId() {
         return accountId;
     }
@@ -34,20 +44,5 @@ public class GetProfileResponseDto {
     public String getBio() {
         return bio;
     }
-
-    public void setAccountId(Long accountId) {
-        this.accountId = accountId;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public void setBirth(Date birth) {
-        this.birth = birth;
-    }
-
-    public void setBio(String bio) {
-        this.bio = bio;
-    }
 }
+
