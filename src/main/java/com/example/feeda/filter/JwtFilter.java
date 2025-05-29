@@ -47,12 +47,14 @@ public class JwtFilter extends OncePerRequestFilter {
             // JWT 유효성 검사와 claims 추출
             Claims claims = jwtUtil.extractClaims(jwt);
             if (claims == null) {
-                throw new JwtValidationException("잘못된 JWT 토큰입니다.", HttpServletResponse.SC_BAD_REQUEST);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 JWT 토큰입니다.");
+                return;
             }
 
             // 블랙리스트 검증
             if (jwtBlacklistService.isBlacklisted(jwt)) {
-                throw new JwtValidationException("로그아웃된 토큰입니다.", HttpServletResponse.SC_UNAUTHORIZED);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그아웃된 JWT 토큰입니다.");
+                return;
             }
 
             Long accountId = jwtUtil.getAccountId(jwt);
