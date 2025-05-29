@@ -1,18 +1,17 @@
 package com.example.feeda.domain.profile.dto;
 
+import lombok.Getter;
+
+@Getter
 public class UpdateProfileResponseDto {
 
-    private String message;
+    private final String message;
 
-    public UpdateProfileResponseDto(String message) {
+    private UpdateProfileResponseDto(String message) {
         this.message = message;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    public static UpdateProfileResponseDto from(String message) {
+        return new UpdateProfileResponseDto(message);
     }
 }

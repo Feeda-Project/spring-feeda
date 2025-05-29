@@ -1,11 +1,18 @@
 package com.example.feeda.domain.profile.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
 @Table(name = "profile")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+
 public class Profile extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,28 +25,18 @@ public class Profile extends BaseEntity {
 
     private String bio;
 
-    /**
-     * JPA에서 기본으로 사용되는 기본 생성자
-     */
 
-    protected Profile () {}
-
-
-     //getter
-    public Long getId() {
-        return id;
+    public static Profile of(String nickname, Date birth, String bio) {
+        return new Profile(null, nickname, birth, bio, null, null);
     }
 
-    public String getNickname() {
-        return nickname;
-    }
+    public Profile(Long id, String nickname, Date birth, String bio, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        super(updatedAt, createdAt);
+        this.id = id;
+        this.nickname = nickname;
+        this.birth = birth;
+        this.bio = bio;
 
-    public Date getBirth() {
-        return birth;
-    }
-
-    public String getBio() {
-        return bio;
     }
 
     public void updateProfile(String nickname, Date birth, String bio) {

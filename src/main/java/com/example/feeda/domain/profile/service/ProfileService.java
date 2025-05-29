@@ -37,7 +37,7 @@ public class ProfileService {
                         HttpStatus.NOT_FOUND, "해당 회원을 찾을 수 없습니다."
                 ));
 
-        return new GetProfileResponseDto(
+        return GetProfileResponseDto.of(
                 profile.getId(),
                 profile.getNickname(),
                 profile.getBirth(),
@@ -50,28 +50,28 @@ public class ProfileService {
     /**
      * 프로필 다건 조회 기능(검색,페이징)
      */
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+
+    @Transactional(readOnly = true)
     public ProfileListResponseDto getProfiles(String keyword, int page, int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
-        Page<Profile> profilePage;
-
-        if (pageable.getPageNumber() < 0 || pageable.getPageSize() <= 0) {
+        if (page < 1 || size < 1) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "요청 파라미터가 잘못되었습니다. (예: page < 0, size <= 0)"
+                    "페이지 번호는 1 이상, 페이지 크기는 1 이상이어야 합니다."
             );
         }
 
-        if (keyword == null || keyword.isEmpty()) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("id").ascending());
+
+        Page<Profile> profilePage;
+        if (keyword == null || keyword.trim().isEmpty()) {
             profilePage = profileRepository.findAll(pageable);
         } else {
             profilePage = profileRepository.findByNicknameContaining(keyword, pageable);
         }
 
-
         List<GetProfileResponseDto> responseDtoList = profilePage.stream()
-                .map(profile -> new GetProfileResponseDto(
+                .map(profile -> GetProfileResponseDto.of(
                         profile.getId(),
                         profile.getNickname(),
                         profile.getBirth(),
@@ -81,13 +81,14 @@ public class ProfileService {
                 ))
                 .toList();
 
-        return new ProfileListResponseDto(
+        return ProfileListResponseDto.of(
                 responseDtoList,
-                profilePage.getNumber(),
+                profilePage.getNumber() + 1,  // 다시 1부터 시작하는 번호로 반환
                 profilePage.getTotalPages(),
                 profilePage.getTotalElements()
         );
     }
+
 
     /**
      * 프로필 수정 기능
@@ -106,6 +107,6 @@ public class ProfileService {
 
         profileRepository.save(profile);
 
-        return new UpdateProfileResponseDto("프로필이 성공적으로 수정되었습니다.");
+        return UpdateProfileResponseDto.from("프로필이 성공적으로 수정되었습니다.");
     }
 }
