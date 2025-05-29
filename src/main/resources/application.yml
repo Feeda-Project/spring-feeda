@@ -14,10 +14,3 @@ server:
 jwt:
   secret:
     key: ${SECRET_KEY}
-
-
-logging:
-  level:
-    org:
-      springframework:
-        security: trace
