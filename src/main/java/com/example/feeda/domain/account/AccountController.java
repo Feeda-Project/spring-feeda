@@ -29,7 +29,7 @@ public class AccountController {
             @AuthenticationPrincipal JwtPayload jwtPayload,
             @RequestBody DeleteAccountRequestDTO requestDTO
     ) {
-        accountService.deleteAccount(jwtPayload.getProfileId(), requestDTO.getPassword());
+        accountService.deleteAccount(jwtPayload.getAccountId(), requestDTO.getPassword());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
