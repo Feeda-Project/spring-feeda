@@ -3,15 +3,13 @@ spring:
     name: feeda
 
   datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
 server:
   error:
     include-message: always
-
-#  logging.level.org.springframework.security = trace
 
 jwt:
   secret:
