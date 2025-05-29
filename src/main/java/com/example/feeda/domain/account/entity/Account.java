@@ -1,5 +1,6 @@
 package com.example.feeda.domain.account.entity;
 
+import com.example.feeda.domain.profile.entity.Profile;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,6 +34,10 @@ public class Account {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Setter
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, optional = false)
+    private Profile profile;
 
     public Account() {
         // @Entity: no-arg 생성자가 포함되어야 함

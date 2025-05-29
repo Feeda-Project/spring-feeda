@@ -5,6 +5,7 @@ import com.example.feeda.domain.account.dto.UpdatePasswordRequestDTO;
 import com.example.feeda.domain.account.dto.UserResponseDTO;
 import com.example.feeda.domain.account.dto.SignUpRequestDTO;
 import com.example.feeda.domain.account.entity.Account;
+import com.example.feeda.domain.profile.entity.Profile;
 import com.example.feeda.security.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public UserResponseDTO signup(SignUpRequestDTO requestDTO) {
         if(accountRepository.findByEmail(requestDTO.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 이메일 입니다. : " + requestDTO.getEmail());
@@ -28,11 +30,15 @@ public class AccountService {
         Account account = new Account(requestDTO.getEmail(), requestDTO.getPassword());
         account.setPassword(passwordEncoder.encode(account.getPassword()));
 
-        Account saveAccount = accountRepository.save(account);
+        Profile profile = new Profile(requestDTO.getNickName(), requestDTO.getBirth(), requestDTO.getBio());
 
-        // Todo: Profile 생성 로직 추가
+        // 양방향 연결
+        account.setProfile(profile);
+        profile.setAccount(account);
 
-        return new UserResponseDTO(saveAccount);
+        Account saveProfile = accountRepository.save(account);
+
+        return new UserResponseDTO(saveProfile);
     }
 
     @Transactional
@@ -69,7 +75,6 @@ public class AccountService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다."))
         );
     }
-
 
 
     /* 유틸(?): 서비스 내에서만 사용 */

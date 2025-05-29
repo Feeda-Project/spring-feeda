@@ -15,11 +15,10 @@ public class UserResponseDTO {
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    // TODO: Profile 값 도 추가
-
     public UserResponseDTO(Account account) {
         this.id = account.getId();
         this.email = account.getEmail();
+        this.nickName = account.getProfile().getNickname();
         this.createdAt = account.getCreatedAt();
         this.updatedAt = account.getUpdatedAt();
     }
