@@ -1,7 +1,7 @@
 package com.example.feeda.domain.follow.controller;
 
-import com.example.feeda.domain.follow.dto.FollowResponse;
-import com.example.feeda.domain.follow.dto.ProfileResponse;
+import com.example.feeda.domain.follow.dto.FollowsResponseDto;
+import com.example.feeda.domain.follow.dto.ProfilesResponseDto;
 import com.example.feeda.domain.follow.service.FollowsService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class FollowsController {
     private final FollowsService followsService;
 
     @PostMapping("/{profileId}")
-    public FollowResponse follow(@PathVariable Long profileId,
+    public FollowsResponseDto follow(@PathVariable Long profileId,
         Authentication auth) {
 
         return followsService.follow(auth, profileId);
@@ -38,25 +38,25 @@ public class FollowsController {
     }
 
     @GetMapping("/{profileId}/followings")
-    public List<ProfileResponse> getFollowings(@PathVariable Long profileId) {
+    public List<ProfilesResponseDto> getFollowings(@PathVariable Long profileId) {
 
         return followsService.findFollowings(profileId);
     }
 
     @GetMapping("/{profileId}/followers")
-    public List<ProfileResponse> getFollowers(@PathVariable Long profileId) {
+    public List<ProfilesResponseDto> getFollowers(@PathVariable Long profileId) {
 
         return followsService.findFollowers(profileId);
     }
 
     @GetMapping("/followings")
-    public List<ProfileResponse> getMyFollowings(Authentication auth) {
+    public List<ProfilesResponseDto> getMyFollowings(Authentication auth) {
 
         return followsService.findFollowings(Long.parseLong(auth.getName()));
     }
 
     @GetMapping("/followers")
-    public List<ProfileResponse> getMyFollowers(Authentication auth) {
+    public List<ProfilesResponseDto> getMyFollowers(Authentication auth) {
 
         return followsService.findFollowers(Long.parseLong(auth.getName()));
     }
