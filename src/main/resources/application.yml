@@ -1,13 +1,16 @@
 spring:
+  application:
+    name: feeda
+
   datasource:
-    url: jdbc:mysql://localhost:3306/feeda_db?serverTimezone=UTC&useSSL=false
+    url: jdbc:mysql://localhost:3306/${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
-  jpa:
-    hibernate:
-      ddl-auto: create
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+server:
+  error:
+    include-message: always
+
+jwt:
+  secret:
+    key: ${SECRET_KEY}
