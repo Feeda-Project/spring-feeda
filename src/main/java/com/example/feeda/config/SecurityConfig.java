@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -39,13 +38,12 @@ public class SecurityConfig {
                         // 회원가입, 로그인은 인증 제외
                         .requestMatchers("/api/accounts", "/api/accounts/login").permitAll()
 
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/api/**").authenticated()
+
                         // 비로그인 시 GET 만 허용
-                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
-
-                        // FIXME: 변경 필요
-                        .requestMatchers("/api/**").permitAll()
-
-//                        .requestMatchers("/api/**").authenticated()
+//                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
+//                        .requestMatchers("/api/**").permitAll()
 
                         .anyRequest().denyAll()
                 )

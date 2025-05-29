@@ -11,6 +11,15 @@ server:
   error:
     include-message: always
 
+#  logging.level.org.springframework.security = trace
+
 jwt:
   secret:
     key: enfih1329hs9dvalwmEJib31agea3131tgfsahsj6jwaw4gr80gkjsnoefnqldc
+
+
+logging:
+  level:
+    org:
+      springframework:
+        security: trace
