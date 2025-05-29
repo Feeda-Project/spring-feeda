@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
-@Table(name = "profile")
+@Table(name = "profiles")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Profile extends BaseEntity {
