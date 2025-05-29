@@ -49,10 +49,11 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
 
-            Long userId = jwtUtil.getUserId(jwt);
+            Long accountId = jwtUtil.getAccountId(jwt);
+            Long profileId = jwtUtil.getProfileId(jwt);
             String nickName = jwtUtil.getNickName(jwt);
             String email = jwtUtil.getEmail(jwt);
-            JwtPayload payload = new JwtPayload(userId, email, nickName);
+            JwtPayload payload = new JwtPayload(accountId, profileId, email, nickName);
 
             // 인증 객체 생성: 사용자 정보(payload), 패스워드(""), 권한 목록(empty)
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
