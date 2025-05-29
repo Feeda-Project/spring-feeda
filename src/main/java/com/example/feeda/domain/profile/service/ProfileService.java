@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -28,28 +29,39 @@ public class ProfileService {
     /**
      * 프로필 단건 조회 기능
      */
+    @Transactional(readOnly = true)
+    public GetProfileResponseDto getProfile(Long id) {
 
-    public GetProfileResponseDto getProfileService(Long accountId) {
-
-        Profile profile = profileRepository.findById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
+        Profile profile = profileRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "해당 회원을 찾을 수 없습니다."
+                ));
 
         return new GetProfileResponseDto(
-                profile.getAccountId(),
+                profile.getId(),
                 profile.getNickname(),
                 profile.getBirth(),
-                profile.getBio()
+                profile.getBio(),
+                profile.getCreatedAt(),
+                profile.getUpdatedAt()
         );
     }
 
     /**
      * 프로필 다건 조회 기능(검색,페이징)
      */
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public ProfileListResponseDto getProfiles(String keyword, int page, int size) {
 
-    public ProfileListResponseDto getProfilesService(String keyword, int page, int size) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("accountId").ascending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         Page<Profile> profilePage;
+
+        if (pageable.getPageNumber() < 0 || pageable.getPageSize() <= 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "요청 파라미터가 잘못되었습니다. (예: page < 0, size <= 0)"
+            );
+        }
 
         if (keyword == null || keyword.isEmpty()) {
             profilePage = profileRepository.findAll(pageable);
@@ -57,12 +69,15 @@ public class ProfileService {
             profilePage = profileRepository.findByNicknameContaining(keyword, pageable);
         }
 
+
         List<GetProfileResponseDto> responseDtoList = profilePage.stream()
                 .map(profile -> new GetProfileResponseDto(
-                        profile.getAccountId(),
+                        profile.getId(),
                         profile.getNickname(),
                         profile.getBirth(),
-                        profile.getBio()
+                        profile.getBio(),
+                        profile.getCreatedAt(),
+                        profile.getUpdatedAt()
                 ))
                 .toList();
 
@@ -77,10 +92,10 @@ public class ProfileService {
     /**
      * 프로필 수정 기능
      */
+    @Transactional
+    public UpdateProfileResponseDto updateProfile(Long id, UpdateProfileRequestDto requestDto) {
 
-    public UpdateProfileResponseDto updateProfile(Long accountId, UpdateProfileRequestDto requestDto) {
-
-        Profile profile = profileRepository.findById(accountId)
+        Profile profile = profileRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "회원 없음."));
 
         profile.updateProfile(

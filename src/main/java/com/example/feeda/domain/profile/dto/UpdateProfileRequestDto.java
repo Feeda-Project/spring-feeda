@@ -1,10 +1,13 @@
 package com.example.feeda.domain.profile.dto;
 
+import jakarta.validation.constraints.Size;
+
 import java.util.Date;
 
 public class UpdateProfileRequestDto {
 
     // 닉네임
+    @Size(max = 50, message = "닉네임은 50자 이하로 입력해주세요.")
     private final String nickname;
 
     private final Date birth;
@@ -17,6 +20,7 @@ public class UpdateProfileRequestDto {
      */
 
     public UpdateProfileRequestDto(String nickname, Date birth, String bio) {
+
         this.nickname = nickname;
         this.birth = birth;
         this.bio = bio;

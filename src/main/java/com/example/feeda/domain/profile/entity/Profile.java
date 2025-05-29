@@ -9,7 +9,7 @@ import java.util.Date;
 public class Profile extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long accountId;
+    private Long id;
 
     @Column(nullable = false)
     private String nickname;
@@ -26,8 +26,8 @@ public class Profile extends BaseEntity {
 
 
      //getter
-    public Long getAccountId() {
-        return accountId;
+    public Long getId() {
+        return id;
     }
 
     public String getNickname() {

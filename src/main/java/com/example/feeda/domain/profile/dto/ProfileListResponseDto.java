@@ -27,6 +27,7 @@ public class ProfileListResponseDto {
     /**
      * 모든 필드를 초기화하는 생성자
      */
+
     public ProfileListResponseDto(List<GetProfileResponseDto> profiles, int currentPage, int totalPages, long totalItems) {
         this.profiles = profiles;
         this.currentPage = currentPage;

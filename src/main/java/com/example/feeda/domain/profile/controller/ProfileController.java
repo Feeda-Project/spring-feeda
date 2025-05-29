@@ -5,6 +5,7 @@ import com.example.feeda.domain.profile.dto.ProfileListResponseDto;
 import com.example.feeda.domain.profile.dto.UpdateProfileRequestDto;
 import com.example.feeda.domain.profile.dto.UpdateProfileResponseDto;
 import com.example.feeda.domain.profile.service.ProfileService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,22 +24,23 @@ public class ProfileController {
      * 프로필 단건 조회 API
      */
 
-    @GetMapping("/profiles/{accountId}")
-    public ResponseEntity<GetProfileResponseDto> getProfileAPI(@PathVariable Long accountId) {
-        GetProfileResponseDto responseDto = profileService.getProfileService(accountId);
+    @GetMapping("/profiles/{id}")
+    public ResponseEntity<GetProfileResponseDto> getProfile(@PathVariable Long id) {
+        GetProfileResponseDto responseDto = profileService.getProfile(id);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
     /**
      * 프로필 전체 조회 API (검색, 페이징)
      */
 
     @GetMapping("/profiles")
-    public ResponseEntity<ProfileListResponseDto> getProfilesAPI(
+    public ResponseEntity<ProfileListResponseDto> getProfiles(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        ProfileListResponseDto response = profileService.getProfilesService(keyword, page, size);
+        ProfileListResponseDto response = profileService.getProfiles(keyword, page, size);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -46,12 +48,12 @@ public class ProfileController {
      * 프로필 전체 수정 API (검색, 페이징)
      */
 
-    @PatchMapping("/profiles/{accountId}")
-    public ResponseEntity<UpdateProfileResponseDto> patchProfile(
-            @PathVariable Long accountId,
-            @RequestBody UpdateProfileRequestDto requestDto) {
+    @PutMapping("/profiles/{id}")
+    public ResponseEntity<UpdateProfileResponseDto> updateProfile(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateProfileRequestDto requestDto) {
 
-        UpdateProfileResponseDto responseDto = profileService.updateProfile(accountId, requestDto);
+        UpdateProfileResponseDto responseDto = profileService.updateProfile(id, requestDto);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 }

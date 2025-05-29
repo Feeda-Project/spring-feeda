@@ -19,4 +19,21 @@ public abstract class BaseEntity {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    // JPA를 위한 protected 기본 생성자
+    protected BaseEntity() {
+    }
+
+    public BaseEntity(LocalDateTime updatedAt, LocalDateTime createdAt) {
+        this.updatedAt = updatedAt;
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }
