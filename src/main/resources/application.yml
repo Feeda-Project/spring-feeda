@@ -3,7 +3,7 @@ spring:
     name: feeda
 
   datasource:
-    url: jdbc:mysql://localhost:3306/${DB_URL}
+    url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
