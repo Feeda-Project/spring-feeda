@@ -1,7 +1,6 @@
 package com.example.feeda.domain.follow.dto;
 
 import com.example.feeda.domain.follow.entity.Profiles;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import lombok.Getter;
 
@@ -16,11 +15,7 @@ public class ProfilesResponseDto {
     private String nickname;
     private String birth;
     private String bio;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime updatedAt;
 
     public static ProfilesResponseDto of(Profiles profiles) {
