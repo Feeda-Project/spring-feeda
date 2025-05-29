@@ -12,7 +12,6 @@ import java.util.Date;
 @Table(name = "profile")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-
 public class Profile extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +25,8 @@ public class Profile extends BaseEntity {
     private String bio;
 
 
-    public static Profile of(String nickname, Date birth, String bio) {
+    //프로필 생성해줄때 사용
+    public static Profile create(String nickname, Date birth, String bio) {
         return new Profile(null, nickname, birth, bio, null, null);
     }
 
