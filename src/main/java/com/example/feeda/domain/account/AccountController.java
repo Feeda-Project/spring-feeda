@@ -1,6 +1,7 @@
 package com.example.feeda.domain.account;
 
 import com.example.feeda.domain.account.dto.*;
+import com.example.feeda.security.jwt.JwtBlacklistService;
 import com.example.feeda.security.jwt.JwtPayload;
 import com.example.feeda.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AccountController {
     private final AccountService accountService;
+    private final JwtBlacklistService jwtBlacklistService;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/accounts")
@@ -60,4 +62,11 @@ public class AccountController {
         return new ResponseEntity<>(responseDTO, headers, HttpStatus.OK);
     }
 
+    @PostMapping("/accounts/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String bearerToken) {
+        String token = jwtUtil.extractToken(bearerToken);
+        jwtBlacklistService.addBlacklist(token);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

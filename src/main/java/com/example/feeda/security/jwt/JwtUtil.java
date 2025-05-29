@@ -60,6 +60,11 @@ public class JwtUtil {
                 .getBody();
     }
 
+    public long getRemainingExpiration(String token) {
+        Date expiration = extractClaims(token).getExpiration();
+        return expiration.getTime() - System.currentTimeMillis();
+    }
+
     public Long getAccountId(String token) {
         return Long.parseLong(extractClaims(token).getSubject());
     }

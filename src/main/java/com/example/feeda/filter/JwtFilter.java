@@ -1,6 +1,7 @@
 package com.example.feeda.filter;
 
 import com.example.feeda.exception.JwtValidationException;
+import com.example.feeda.security.jwt.JwtBlacklistService;
 import com.example.feeda.security.jwt.JwtPayload;
 import com.example.feeda.security.jwt.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -23,6 +24,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
+    private final JwtBlacklistService jwtBlacklistService;
     private final JwtUtil jwtUtil;
 
     @Override
@@ -45,8 +47,12 @@ public class JwtFilter extends OncePerRequestFilter {
             // JWT 유효성 검사와 claims 추출
             Claims claims = jwtUtil.extractClaims(jwt);
             if (claims == null) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 JWT 토큰입니다.");
-                return;
+                throw new JwtValidationException("잘못된 JWT 토큰입니다.", HttpServletResponse.SC_BAD_REQUEST);
+            }
+
+            // 블랙리스트 검증
+            if (jwtBlacklistService.isBlacklisted(jwt)) {
+                throw new JwtValidationException("로그아웃된 토큰입니다.", HttpServletResponse.SC_UNAUTHORIZED);
             }
 
             Long accountId = jwtUtil.getAccountId(jwt);
