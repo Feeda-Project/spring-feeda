@@ -27,7 +27,7 @@ public class AccountController {
             @AuthenticationPrincipal JwtPayload jwtPayload,
             @RequestBody DeleteAccountRequestDTO requestDTO
     ) {
-        accountService.deleteAccount(jwtPayload.getUserId(), requestDTO.getPassword());
+        accountService.deleteAccount(jwtPayload.getProfileId(), requestDTO.getPassword());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -36,7 +36,7 @@ public class AccountController {
             @AuthenticationPrincipal JwtPayload jwtPayload,
             @RequestBody UpdatePasswordRequestDTO requestDTO
     ) {
-        return new ResponseEntity<>(accountService.updatePassword(jwtPayload.getUserId(), requestDTO), HttpStatus.OK);
+        return new ResponseEntity<>(accountService.updatePassword(jwtPayload.getAccountId(), requestDTO), HttpStatus.OK);
     }
 
     @PostMapping("/accounts/login")
@@ -45,7 +45,14 @@ public class AccountController {
     ) {
         UserResponseDTO responseDTO = accountService.login(requestDTO);
 
-        String jwt = jwtUtil.createToken(responseDTO.getId(), "gaji", responseDTO.getEmail());
+        JwtPayload payload = new JwtPayload(
+                responseDTO.getAccountId(),
+                responseDTO.getProfileId(),
+                responseDTO.getEmail(),
+                responseDTO.getNickName()
+        );
+
+        String jwt = jwtUtil.createToken(payload);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + jwt);

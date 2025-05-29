@@ -9,14 +9,16 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class UserResponseDTO {
-    private final Long id;
+    private final Long accountId;
+    private final Long profileId;
     private final String email;
     private String nickName;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
     public UserResponseDTO(Account account) {
-        this.id = account.getId();
+        this.accountId = account.getId();
+        this.profileId = account.getProfile().getId();
         this.email = account.getEmail();
         this.nickName = account.getProfile().getNickname();
         this.createdAt = account.getCreatedAt();
