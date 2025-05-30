@@ -56,7 +56,9 @@ public class ProfileController {
             @PathVariable Long id,
             @Valid @RequestBody UpdateProfileRequestDto requestDto) {
 
-        UpdateProfileResponseDto responseDto = profileService.updateProfile(id, requestDto);
+        Long accountId = jwtPayload.getAccountId();
+        UpdateProfileResponseDto responseDto = profileService.updateProfile(accountId, id, requestDto);
+
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 }
