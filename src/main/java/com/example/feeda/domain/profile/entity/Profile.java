@@ -1,5 +1,6 @@
 package com.example.feeda.domain.profile.entity;
 
+import com.example.feeda.domain.account.entity.Account;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,24 +25,34 @@ public class Profile extends BaseEntity {
 
     private String bio;
 
+    @OneToOne
+    @JoinColumn(name = "account_id",unique = true)
+    private Account account;
 
     //프로필 생성해줄때 사용
-    public static Profile create(String nickname, Date birth, String bio) {
-        return new Profile(null, nickname, birth, bio, null, null);
+    public static Profile create(String nickname, Date birth, String bio, Account account) {
+        return new Profile(null, nickname, birth, bio, null, null,account);
     }
 
-    public Profile(Long id, String nickname, Date birth, String bio, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Profile(Long id, String nickname, Date birth, String bio, LocalDateTime createdAt, LocalDateTime updatedAt, Account account) {
         super(updatedAt, createdAt);
         this.id = id;
         this.nickname = nickname;
         this.birth = birth;
         this.bio = bio;
+        this.account = account;
 
     }
 
     public void updateProfile(String nickname, Date birth, String bio) {
-        this.nickname = nickname;
-        this.birth = birth;
-        this.bio = bio;
+        if (nickname != null) {
+            this.nickname = nickname;
+        }
+        if (birth != null) {
+            this.birth = birth;
+        }
+        if (bio != null) {
+            this.bio = bio;
+        }
     }
 }
