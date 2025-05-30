@@ -4,6 +4,7 @@ import com.example.feeda.domain.follow.dto.FollowsResponseDto;
 import com.example.feeda.domain.follow.entity.Follows;
 import com.example.feeda.domain.follow.repository.FollowsRepository;
 import com.example.feeda.domain.profile.dto.GetProfileResponseDto;
+import com.example.feeda.domain.profile.dto.ProfileListResponseDto;
 import com.example.feeda.domain.profile.entity.Profile;
 import com.example.feeda.domain.profile.repository.ProfileRepository;
 import com.example.feeda.security.jwt.JwtPayload;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +52,6 @@ public class FollowsServiceImpl implements FollowsService {
         return FollowsResponseDto.of(newFollow);
     }
 
-
     @Override
     @Transactional
     public void unfollow(JwtPayload jwtPayload, Long followingId) {
@@ -69,15 +71,15 @@ public class FollowsServiceImpl implements FollowsService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<GetProfileResponseDto> findFollowings(Long profileId, JwtPayload jwtPayload) {
+    public ProfileListResponseDto findFollowingsPage(
+        Long profileId,
+        JwtPayload jwtPayload,
+        Pageable pageable) {
 
-        List<Follows> followings = followsRepository.findAllByFollowers_Id(profileId);
-        List<Profile> profiles = followings.stream()
-            .map(Follows::getFollowings)
-            .toList();
+        Page<Profile> profiles = followsRepository.findAllByFollowers_Id(profileId, pageable).map(
+            Follows::getFollowings);
 
-        return profiles.stream()
+        List<GetProfileResponseDto> responseDtoList = profiles.stream()
             .map(profile -> GetProfileResponseDto.of(
                 profile.getId(),
                 profile.getNickname(),
@@ -87,18 +89,25 @@ public class FollowsServiceImpl implements FollowsService {
                 profile.getUpdatedAt()
             ))
             .toList();
+
+        return ProfileListResponseDto.of(
+            responseDtoList,
+            profiles.getNumber() + 1,  // 다시 1부터 시작하는 번호로 반환
+            profiles.getTotalPages(),
+            profiles.getTotalElements()
+        );
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<GetProfileResponseDto> findFollowers(Long profileId, JwtPayload jwtPayload) {
+    public ProfileListResponseDto findFollowersPage(
+        Long profileId,
+        JwtPayload jwtPayload,
+        Pageable pageable) {
 
-        List<Follows> followers = followsRepository.findAllByFollowings_Id(profileId);
-        List<Profile> profiles = followers.stream()
-            .map(Follows::getFollowers)
-            .toList();
+        Page<Profile> profiles = followsRepository.findAllByFollowings_Id(profileId, pageable)
+            .map(Follows::getFollowers);
 
-        return profiles.stream()
+        List<GetProfileResponseDto> responseDtoList = profiles.stream()
             .map(profile -> GetProfileResponseDto.of(
                 profile.getId(),
                 profile.getNickname(),
@@ -108,6 +117,13 @@ public class FollowsServiceImpl implements FollowsService {
                 profile.getUpdatedAt()
             ))
             .toList();
+
+        return ProfileListResponseDto.of(
+            responseDtoList,
+            profiles.getNumber() + 1,  // 다시 1부터 시작하는 번호로 반환
+            profiles.getTotalPages(),
+            profiles.getTotalElements()
+        );
     }
 
     private Profile getProfileOrThrow(Long profileId) {
