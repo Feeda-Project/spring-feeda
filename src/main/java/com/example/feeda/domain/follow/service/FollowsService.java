@@ -1,9 +1,9 @@
 package com.example.feeda.domain.follow.service;
 
 import com.example.feeda.domain.follow.dto.FollowsResponseDto;
-import com.example.feeda.domain.profile.dto.GetProfileResponseDto;
+import com.example.feeda.domain.profile.dto.ProfileListResponseDto;
 import com.example.feeda.security.jwt.JwtPayload;
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public interface FollowsService {
 
@@ -11,7 +11,9 @@ public interface FollowsService {
 
     void unfollow(JwtPayload jwtPayload, Long followingId);
 
-    List<GetProfileResponseDto> findFollowings(Long profileId, JwtPayload jwtPayload);
+    ProfileListResponseDto findFollowingsPage(Long profileId, JwtPayload jwtPayload,
+        Pageable pageable);
 
-    List<GetProfileResponseDto> findFollowers(Long profileId, JwtPayload jwtPayload);
+    ProfileListResponseDto findFollowersPage(Long profileId, JwtPayload jwtPayload,
+        Pageable pageable);
 }
