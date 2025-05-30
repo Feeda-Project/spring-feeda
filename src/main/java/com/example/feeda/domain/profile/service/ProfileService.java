@@ -103,11 +103,13 @@ public class ProfileService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "수정 권한이 없습니다.");
         }
 
-        profile.updateProfile(
-                requestDto.getNickname(),
-                requestDto.getBirth(),
-                requestDto.getBio()
-        );
+        if (requestDto.getNickname() != null || requestDto.getBirth() != null || requestDto.getBio() != null) {
+            profile.updateProfile(
+                    requestDto.getNickname(),
+                    requestDto.getBirth(),
+                    requestDto.getBio()
+            );
+        }
 
         profileRepository.save(profile);
 

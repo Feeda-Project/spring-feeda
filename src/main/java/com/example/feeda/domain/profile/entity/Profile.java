@@ -50,14 +50,8 @@ public class Profile extends BaseEntity {
     }
 
     public void updateProfile(String nickname, Date birth, String bio) {
-        if (nickname != null) {
             this.nickname = nickname;
-        }
-        if (birth != null) {
             this.birth = birth;
-        }
-        if (bio != null) {
             this.bio = bio;
         }
     }
-}
