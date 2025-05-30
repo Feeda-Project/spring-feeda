@@ -26,10 +26,15 @@ public class AccountController {
 
     @DeleteMapping("/accounts/me")
     public ResponseEntity<Void> deleteAccount(
+            @RequestHeader("Authorization") String bearerToken,
             @AuthenticationPrincipal JwtPayload jwtPayload,
             @RequestBody DeleteAccountRequestDTO requestDTO
     ) {
         accountService.deleteAccount(jwtPayload.getAccountId(), requestDTO.getPassword());
+
+        // 토큰 무효화
+        invalidateToken(bearerToken);
+
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -64,9 +69,15 @@ public class AccountController {
 
     @PostMapping("/accounts/logout")
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String bearerToken) {
-        String token = jwtUtil.extractToken(bearerToken);
-        jwtBlacklistService.addBlacklist(token);
+        // 토큰 무효화
+        invalidateToken(bearerToken);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
+    private void invalidateToken(String bearerToken) {
+        String token = jwtUtil.extractToken(bearerToken);
+        jwtBlacklistService.addBlacklist(token);
     }
 }
