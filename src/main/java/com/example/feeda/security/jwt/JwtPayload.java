@@ -6,7 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class JwtPayload {
-    private final Long userId;
+    private final Long accountId;
+    private final Long profileId;
     private final String email;
     private final String nickName;
 }

@@ -35,6 +35,7 @@ public class Account {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Setter
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, optional = false)
     private Profile profile;
 

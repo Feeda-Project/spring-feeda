@@ -1,6 +1,7 @@
 package com.example.feeda.domain.account;
 
 import com.example.feeda.domain.account.dto.*;
+import com.example.feeda.security.jwt.JwtBlacklistService;
 import com.example.feeda.security.jwt.JwtPayload;
 import com.example.feeda.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AccountController {
     private final AccountService accountService;
+    private final JwtBlacklistService jwtBlacklistService;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/accounts")
@@ -27,7 +29,7 @@ public class AccountController {
             @AuthenticationPrincipal JwtPayload jwtPayload,
             @RequestBody DeleteAccountRequestDTO requestDTO
     ) {
-        accountService.deleteAccount(jwtPayload.getUserId(), requestDTO.getPassword());
+        accountService.deleteAccount(jwtPayload.getAccountId(), requestDTO.getPassword());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -36,7 +38,7 @@ public class AccountController {
             @AuthenticationPrincipal JwtPayload jwtPayload,
             @RequestBody UpdatePasswordRequestDTO requestDTO
     ) {
-        return new ResponseEntity<>(accountService.updatePassword(jwtPayload.getUserId(), requestDTO), HttpStatus.OK);
+        return new ResponseEntity<>(accountService.updatePassword(jwtPayload.getAccountId(), requestDTO), HttpStatus.OK);
     }
 
     @PostMapping("/accounts/login")
@@ -45,7 +47,14 @@ public class AccountController {
     ) {
         UserResponseDTO responseDTO = accountService.login(requestDTO);
 
-        String jwt = jwtUtil.createToken(responseDTO.getId(), "gaji", responseDTO.getEmail());
+        JwtPayload payload = new JwtPayload(
+                responseDTO.getAccountId(),
+                responseDTO.getProfileId(),
+                responseDTO.getEmail(),
+                responseDTO.getNickName()
+        );
+
+        String jwt = jwtUtil.createToken(payload);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + jwt);
@@ -53,4 +62,11 @@ public class AccountController {
         return new ResponseEntity<>(responseDTO, headers, HttpStatus.OK);
     }
 
+    @PostMapping("/accounts/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String bearerToken) {
+        String token = jwtUtil.extractToken(bearerToken);
+        jwtBlacklistService.addBlacklist(token);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

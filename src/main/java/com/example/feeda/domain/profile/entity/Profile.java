@@ -2,9 +2,7 @@ package com.example.feeda.domain.profile.entity;
 
 import com.example.feeda.domain.account.entity.Account;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -13,6 +11,7 @@ import java.util.Date;
 @Table(name = "profiles")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Profile extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,13 +24,20 @@ public class Profile extends BaseEntity {
 
     private String bio;
 
+    @Setter
     @OneToOne
-    @JoinColumn(name = "account_id",unique = true)
+    @JoinColumn(name = "account_id", unique = true)
     private Account account;
 
     //프로필 생성해줄때 사용
     public static Profile create(String nickname, Date birth, String bio, Account account) {
-        return new Profile(null, nickname, birth, bio, null, null,account);
+        return new Profile(null, nickname, birth, bio, null, null, account);
+    }
+
+    public Profile(String nickname, Date birth, String bio) {
+        this.nickname = nickname;
+        this.birth = birth;
+        this.bio = bio;
     }
 
     public Profile(Long id, String nickname, Date birth, String bio, LocalDateTime createdAt, LocalDateTime updatedAt, Account account) {
@@ -41,7 +47,6 @@ public class Profile extends BaseEntity {
         this.birth = birth;
         this.bio = bio;
         this.account = account;
-
     }
 
     public void updateProfile(String nickname, Date birth, String bio) {

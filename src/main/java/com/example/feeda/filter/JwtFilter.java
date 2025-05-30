@@ -1,6 +1,7 @@
 package com.example.feeda.filter;
 
 import com.example.feeda.exception.JwtValidationException;
+import com.example.feeda.security.jwt.JwtBlacklistService;
 import com.example.feeda.security.jwt.JwtPayload;
 import com.example.feeda.security.jwt.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -23,6 +24,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
+    private final JwtBlacklistService jwtBlacklistService;
     private final JwtUtil jwtUtil;
 
     @Override
@@ -34,7 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String bearerJwt = request.getHeader("Authorization");
 
-        if (bearerJwt == null) {
+        if (bearerJwt == null || !bearerJwt.matches("^Bearer\\s+[A-Za-z0-9-_.]+$")) {
             chain.doFilter(request, response);
             return;
         }
@@ -49,10 +51,17 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
 
-            Long userId = jwtUtil.getUserId(jwt);
+            // 블랙리스트 검증
+            if (jwtBlacklistService.isBlacklisted(jwt)) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "만료된 JWT 토큰입니다.");
+                return;
+            }
+
+            Long accountId = jwtUtil.getAccountId(jwt);
+            Long profileId = jwtUtil.getProfileId(jwt);
             String nickName = jwtUtil.getNickName(jwt);
             String email = jwtUtil.getEmail(jwt);
-            JwtPayload payload = new JwtPayload(userId, email, nickName);
+            JwtPayload payload = new JwtPayload(accountId, profileId, email, nickName);
 
             // 인증 객체 생성: 사용자 정보(payload), 패스워드(""), 권한 목록(empty)
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(

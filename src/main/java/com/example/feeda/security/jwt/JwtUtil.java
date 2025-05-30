@@ -30,13 +30,14 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String createToken(Long userId, String nickName, String email) {
+    public String createToken(JwtPayload payload) {
         Date date = new Date();
 
         return Jwts.builder()
-                    .setSubject(String.valueOf(userId))
-                    .claim("nickName", nickName)
-                    .claim("email", email)
+                    .setSubject(String.valueOf(payload.getAccountId()))
+                    .claim("profileId", payload.getProfileId())
+                    .claim("nickName", payload.getNickName())
+                    .claim("email", payload.getEmail())
                     .setExpiration(new Date(date.getTime() + TOKEN_TIME))
                     .setIssuedAt(date) // 발급일
                     .signWith(key, signatureAlgorithm) // 암호화 알고리즘
@@ -59,8 +60,17 @@ public class JwtUtil {
                 .getBody();
     }
 
-    public Long getUserId(String token) {
+    public long getRemainingExpiration(String token) {
+        Date expiration = extractClaims(token).getExpiration();
+        return expiration.getTime() - System.currentTimeMillis();
+    }
+
+    public Long getAccountId(String token) {
         return Long.parseLong(extractClaims(token).getSubject());
+    }
+
+    public Long getProfileId(String token) {
+        return extractClaims(token).get("profileId", Long.class);
     }
 
     public String getNickName(String token) {

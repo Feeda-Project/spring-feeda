@@ -29,7 +29,6 @@ public class ProfileService {
     /**
      * 프로필 단건 조회 기능
      */
-
     @Transactional(readOnly = true)
     public GetProfileResponseDto getProfile(Long id) {
 

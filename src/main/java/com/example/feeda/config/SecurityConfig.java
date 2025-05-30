@@ -1,6 +1,7 @@
 package com.example.feeda.config;
 
 import com.example.feeda.filter.JwtFilter;
+import com.example.feeda.security.jwt.JwtBlacklistService;
 import com.example.feeda.security.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    private final JwtBlacklistService jwtBlacklistService;
     private final JwtUtil jwtUtil;
 
     @Bean
@@ -49,7 +51,7 @@ public class SecurityConfig {
                 )
 
                 // 필터 등록
-                .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtFilter(jwtBlacklistService, jwtUtil), UsernamePasswordAuthenticationFilter.class)
 
                 .exceptionHandling(configurer ->
                         configurer
