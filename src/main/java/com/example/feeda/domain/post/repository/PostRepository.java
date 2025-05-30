@@ -9,11 +9,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    default Post findPostByIdOrElseThrow(Long id) {
-        return findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 게시글"));
-    }
-
     Page<Post> findAllByTitleContaining(String title, Pageable pageable);
 
 }

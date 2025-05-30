@@ -1,17 +1,11 @@
 spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/newsFeed
-    username: root
-    password: 1111
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-#  jpa:
-#    hibernate:
-#      ddl-auto: create
-#    show-sql: true
-#    properties:
-#      hibernate:
-#        format_sql: true
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 
   application:
     name: feeda

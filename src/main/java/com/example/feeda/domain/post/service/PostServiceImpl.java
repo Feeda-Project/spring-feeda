@@ -50,13 +50,11 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post updatePost(Long id, PostRequestDto requestDto) {
-        Post findPost = postRepository.findPostByIdOrElseThrow(id);
+        Post findPost = postRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 게시글"));
 
-        if (findPost == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 게시글");
-        }
 
-        findPost.update(id, requestDto.getTitle(), requestDto.getCategory(), requestDto.getCategory());
+        findPost.update(requestDto.getTitle(), requestDto.getCategory(), requestDto.getCategory());
         postRepository.save(findPost);
 
         return findPost;
@@ -64,7 +62,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void deletePost(Long id) {
-        Post findPost = postRepository.findPostByIdOrElseThrow(id);
+        Post findPost = postRepository.findById(id).orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 게시글"));
 
         postRepository.delete(findPost);
     }
