@@ -36,7 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String bearerJwt = request.getHeader("Authorization");
 
-        if (bearerJwt == null) {
+        if (bearerJwt == null || !bearerJwt.matches("^Bearer\\s+[A-Za-z0-9-_.]+$")) {
             chain.doFilter(request, response);
             return;
         }
@@ -53,7 +53,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             // 블랙리스트 검증
             if (jwtBlacklistService.isBlacklisted(jwt)) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그아웃된 JWT 토큰입니다.");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "만료된 JWT 토큰입니다.");
                 return;
             }
 
