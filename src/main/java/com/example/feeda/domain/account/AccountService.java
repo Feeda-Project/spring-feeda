@@ -6,6 +6,7 @@ import com.example.feeda.domain.account.dto.UserResponseDTO;
 import com.example.feeda.domain.account.dto.SignUpRequestDTO;
 import com.example.feeda.domain.account.entity.Account;
 import com.example.feeda.domain.profile.entity.Profile;
+import com.example.feeda.domain.profile.repository.ProfileRepository;
 import com.example.feeda.security.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,11 +21,16 @@ import org.springframework.web.server.ResponseStatusException;
 public class AccountService {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ProfileRepository profileRepository;
 
     @Transactional
     public UserResponseDTO signup(SignUpRequestDTO requestDTO) {
         if(accountRepository.findByEmail(requestDTO.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 이메일 입니다. : " + requestDTO.getEmail());
+        }
+
+        if(profileRepository.findByNickname(requestDTO.getNickName()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 닉네임 입니다. : " + requestDTO.getNickName());
         }
 
         Account account = new Account(requestDTO.getEmail(), requestDTO.getPassword());

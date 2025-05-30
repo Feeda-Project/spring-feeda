@@ -15,7 +15,7 @@ CREATE TABLE accounts (
 CREATE TABLE profiles (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '사용자 정보 ID (PK)',
     account_id BIGINT COMMENT '사용자 인증 ID (FK)',
-    nickname VARCHAR(50) NOT NULL COMMENT '닉네임',
+    nickname VARCHAR(50) NOT NULL UNIQUE COMMENT '닉네임',
     birth DATE COMMENT '생년월일',
     bio TEXT COMMENT '자기소개',
     created_at DATETIME COMMENT '생성일',

@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface ProfileRepository extends JpaRepository<Profile,Long> {
 
     /**
@@ -13,4 +15,5 @@ public interface ProfileRepository extends JpaRepository<Profile,Long> {
 
     Page<Profile> findByNicknameContaining(String nickname, Pageable pageable);
 
+    Optional<Profile> findByNickname(String nickname);
 }
