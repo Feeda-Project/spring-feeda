@@ -53,7 +53,6 @@ CREATE TABLE post_comments (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '댓글 ID (PK)',
     post_id BIGINT NOT NULL COMMENT '게시글 ID (FK)',
     profile_id BIGINT NOT NULL COMMENT '작성자 ID (FK)',
-    title VARCHAR(100) NOT NULL COMMENT '제목',
     content TEXT NOT NULL COMMENT '내용',
     created_at DATETIME COMMENT '생성일',
     updated_at DATETIME COMMENT '수정일',
