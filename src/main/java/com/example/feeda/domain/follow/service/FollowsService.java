@@ -1,17 +1,17 @@
 package com.example.feeda.domain.follow.service;
 
 import com.example.feeda.domain.follow.dto.FollowsResponseDto;
-import com.example.feeda.domain.follow.dto.ProfilesResponseDto;
+import com.example.feeda.domain.profile.dto.GetProfileResponseDto;
+import com.example.feeda.security.jwt.JwtPayload;
 import java.util.List;
-import org.springframework.security.core.Authentication;
 
 public interface FollowsService {
 
-    FollowsResponseDto follow(Authentication auth, Long profileId);
+    FollowsResponseDto follow(JwtPayload jwtPayload, Long profileId);
 
-    void unfollow(Authentication auth, Long followingId);
+    void unfollow(JwtPayload jwtPayload, Long followingId);
 
-    List<ProfilesResponseDto> findFollowings(Long profileId);
+    List<GetProfileResponseDto> findFollowings(Long profileId, JwtPayload jwtPayload);
 
-    List<ProfilesResponseDto> findFollowers(Long profileId);
+    List<GetProfileResponseDto> findFollowers(Long profileId, JwtPayload jwtPayload);
 }

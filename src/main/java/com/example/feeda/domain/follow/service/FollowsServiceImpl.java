@@ -1,18 +1,20 @@
 package com.example.feeda.domain.follow.service;
 
 import com.example.feeda.domain.follow.dto.FollowsResponseDto;
-import com.example.feeda.domain.follow.dto.ProfilesResponseDto;
 import com.example.feeda.domain.follow.entity.Follows;
-import com.example.feeda.domain.follow.entity.Profiles;
 import com.example.feeda.domain.follow.repository.FollowsRepository;
-import com.example.feeda.domain.follow.repository.ProfilesRepository;
+import com.example.feeda.domain.profile.dto.GetProfileResponseDto;
+import com.example.feeda.domain.profile.entity.Profile;
+import com.example.feeda.domain.profile.repository.ProfileRepository;
+import com.example.feeda.security.jwt.JwtPayload;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Slf4j
@@ -20,30 +22,28 @@ import org.springframework.transaction.annotation.Transactional;
 public class FollowsServiceImpl implements FollowsService {
 
     private final FollowsRepository followsRepository;
-    private final ProfilesRepository profilesRepository;
+    private final ProfileRepository profileRepository;
 
     @Override
     @Transactional
-    public FollowsResponseDto follow(Authentication auth, Long profileId) {
+    public FollowsResponseDto follow(JwtPayload jwtPayload, Long profileId) {
 
-        Long myProfileId = Long.parseLong(auth.getName());
-
-        Optional<Profiles> myProfile =
-            profilesRepository.findById(myProfileId);
+        Optional<Profile> myProfile =
+            profileRepository.findById(jwtPayload.getProfileId());
         if (myProfile.isEmpty()) {
-            log.warn("존재하지 않는 유저 정보입니다.");
-            return null;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "존재하지 않는 프로필입니다." + jwtPayload.getProfileId());
         }
 
-        Optional<Profiles> followingProfile = profilesRepository.findById(profileId);
+        if (myProfile.get().getId().equals(profileId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "본인 프로필은 팔로우/언팔로우 할 수 없습니다");
+        }
+
+        Optional<Profile> followingProfile = profileRepository.findById(profileId);
         if (followingProfile.isEmpty()) {
-            log.warn("존재하지 않는 유저 정보입니다.");
-            return null;
-        }
-
-        if (myProfileId.equals(profileId)) {
-            log.warn("본인 계정은 팔로우/언팔로우 할 수 없습니다.");
-            return null;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "존재하지 않는 프로필입니다." + profileId);
         }
 
         Follows follows = Follows.builder()
@@ -59,61 +59,75 @@ public class FollowsServiceImpl implements FollowsService {
 
     @Override
     @Transactional
-    public void unfollow(Authentication auth, Long followingId) {
+    public void unfollow(JwtPayload jwtPayload, Long followingId) {
 
-        Long myProfileId = Long.parseLong(auth.getName());
-
-        Optional<Profiles> myProfile =
-            profilesRepository.findById(myProfileId);
+        Optional<Profile> myProfile =
+            profileRepository.findById(jwtPayload.getProfileId());
         if (myProfile.isEmpty()) {
-            log.warn("존재하지 않는 유저 정보입니다.");
-            return;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "존재하지 않는 프로필입니다." + jwtPayload.getProfileId());
         }
 
-        Optional<Profiles> followingProfile = profilesRepository.findById(followingId);
+        Optional<Profile> followingProfile = profileRepository.findById(followingId);
         if (followingProfile.isEmpty()) {
-            log.warn("존재하지 않는 유저 정보입니다.");
-            return;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "존재하지 않는 프로필입니다." + followingId);
         }
 
-        if (myProfileId.equals(followingId)) {
-            log.warn("본인 계정은 팔로우/언팔로우 할 수 없습니다.");
-            return;
+        if (myProfile.get().getId().equals(followingId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "본인 프로필은 팔로우/언팔로우 할 수 없습니다");
         }
 
         Optional<Follows> follows =
             followsRepository.findByFollowersAndFollowings(myProfile.get(), followingProfile.get());
         if (follows.isEmpty()) {
-            log.warn("존재하지 않는 유저 정보입니다.");
-            return;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "존재하지 않는 팔로우입니다.");
         }
 
         followsRepository.delete(follows.get());
     }
 
     @Override
-    public List<ProfilesResponseDto> findFollowings(Long profileId) {
+    @Transactional(readOnly = true)
+    public List<GetProfileResponseDto> findFollowings(Long profileId, JwtPayload jwtPayload) {
 
         List<Follows> followings = followsRepository.findAllByFollowers_Id(profileId);
-        List<Profiles> profiles = followings.stream()
+        List<Profile> profiles = followings.stream()
             .map(Follows::getFollowings)
             .toList();
 
         return profiles.stream()
-            .map(ProfilesResponseDto::of)
+            .map(profile -> GetProfileResponseDto.of(
+                profile.getId(),
+                profile.getNickname(),
+                profile.getBirth(),
+                profile.getBio(),
+                profile.getCreatedAt(),
+                profile.getUpdatedAt()
+            ))
             .toList();
     }
 
     @Override
-    public List<ProfilesResponseDto> findFollowers(Long profileId) {
+    @Transactional(readOnly = true)
+    public List<GetProfileResponseDto> findFollowers(Long profileId, JwtPayload jwtPayload) {
 
         List<Follows> followers = followsRepository.findAllByFollowings_Id(profileId);
-        List<Profiles> profiles = followers.stream()
+        List<Profile> profiles = followers.stream()
             .map(Follows::getFollowers)
             .toList();
 
         return profiles.stream()
-            .map(ProfilesResponseDto::of)
+            .map(profile -> GetProfileResponseDto.of(
+                profile.getId(),
+                profile.getNickname(),
+                profile.getBirth(),
+                profile.getBio(),
+                profile.getCreatedAt(),
+                profile.getUpdatedAt()
+            ))
             .toList();
     }
 }

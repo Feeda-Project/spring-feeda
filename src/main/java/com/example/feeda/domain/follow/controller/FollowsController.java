@@ -1,12 +1,13 @@
 package com.example.feeda.domain.follow.controller;
 
 import com.example.feeda.domain.follow.dto.FollowsResponseDto;
-import com.example.feeda.domain.follow.dto.ProfilesResponseDto;
 import com.example.feeda.domain.follow.service.FollowsService;
+import com.example.feeda.domain.profile.dto.GetProfileResponseDto;
+import com.example.feeda.security.jwt.JwtPayload;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,41 +24,45 @@ public class FollowsController {
 
     @PostMapping("/{profileId}")
     public FollowsResponseDto follow(@PathVariable Long profileId,
-        Authentication auth) {
+        @AuthenticationPrincipal JwtPayload jwtPayload) {
 
-        return followsService.follow(auth, profileId);
+        return followsService.follow(jwtPayload, profileId);
     }
 
     @DeleteMapping("/{followingId}")
     public ResponseEntity<Object> unfollow(@PathVariable Long followingId,
-        Authentication auth) {
+        @AuthenticationPrincipal JwtPayload jwtPayload) {
 
-        followsService.unfollow(auth, followingId);
+        followsService.unfollow(jwtPayload, followingId);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{profileId}/followings")
-    public List<ProfilesResponseDto> getFollowings(@PathVariable Long profileId) {
+    public List<GetProfileResponseDto> getFollowings(@PathVariable Long profileId,
+        @AuthenticationPrincipal JwtPayload jwtPayload) {
 
-        return followsService.findFollowings(profileId);
+        return followsService.findFollowings(profileId, jwtPayload);
     }
 
     @GetMapping("/{profileId}/followers")
-    public List<ProfilesResponseDto> getFollowers(@PathVariable Long profileId) {
+    public List<GetProfileResponseDto> getFollowers(@PathVariable Long profileId,
+        @AuthenticationPrincipal JwtPayload jwtPayload) {
 
-        return followsService.findFollowers(profileId);
+        return followsService.findFollowers(profileId, jwtPayload);
     }
 
     @GetMapping("/followings")
-    public List<ProfilesResponseDto> getMyFollowings(Authentication auth) {
+    public List<GetProfileResponseDto> getMyFollowings(
+        @AuthenticationPrincipal JwtPayload jwtPayload) {
 
-        return followsService.findFollowings(Long.parseLong(auth.getName()));
+        return followsService.findFollowings(jwtPayload.getProfileId(), jwtPayload);
     }
 
     @GetMapping("/followers")
-    public List<ProfilesResponseDto> getMyFollowers(Authentication auth) {
+    public List<GetProfileResponseDto> getMyFollowers(
+        @AuthenticationPrincipal JwtPayload jwtPayload) {
 
-        return followsService.findFollowers(Long.parseLong(auth.getName()));
+        return followsService.findFollowers(jwtPayload.getProfileId(), jwtPayload);
     }
 }
