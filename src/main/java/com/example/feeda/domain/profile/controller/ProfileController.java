@@ -5,9 +5,11 @@ import com.example.feeda.domain.profile.dto.ProfileListResponseDto;
 import com.example.feeda.domain.profile.dto.UpdateProfileRequestDto;
 import com.example.feeda.domain.profile.dto.UpdateProfileResponseDto;
 import com.example.feeda.domain.profile.service.ProfileService;
+import com.example.feeda.security.jwt.JwtPayload;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -50,10 +52,13 @@ public class ProfileController {
 
     @PutMapping("/profiles/{id}")
     public ResponseEntity<UpdateProfileResponseDto> updateProfile(
+            @AuthenticationPrincipal JwtPayload jwtPayload,
             @PathVariable Long id,
             @Valid @RequestBody UpdateProfileRequestDto requestDto) {
 
-        UpdateProfileResponseDto responseDto = profileService.updateProfile(id, requestDto);
+        Long userId = jwtPayload.getUserId();
+        UpdateProfileResponseDto responseDto = profileService.updateProfile(userId, id, requestDto);
+
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 }

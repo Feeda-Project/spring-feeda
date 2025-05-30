@@ -13,6 +13,7 @@ public class UpdateProfileRequestDto {
     @Size(max = 50, message = "닉네임은 50자 이하로 입력해주세요.")
     private final String nickname;
 
+    //생일
     private final Date birth;
 
     // 자기소개
