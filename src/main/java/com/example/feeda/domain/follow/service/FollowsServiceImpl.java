@@ -28,32 +28,25 @@ public class FollowsServiceImpl implements FollowsService {
     @Transactional
     public FollowsResponseDto follow(JwtPayload jwtPayload, Long profileId) {
 
-        Optional<Profile> myProfile =
-            profileRepository.findById(jwtPayload.getProfileId());
-        if (myProfile.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "존재하지 않는 프로필입니다." + jwtPayload.getProfileId());
-        }
+        Profile myProfile = getProfileOrThrow(jwtPayload.getProfileId());
+        validateNotSelf(myProfile, profileId);
+        Profile followingProfile = getProfileOrThrow(profileId);
 
-        if (myProfile.get().getId().equals(profileId)) {
+        Optional<Follows> follow =
+            followsRepository.findByFollowersAndFollowings(myProfile, followingProfile);
+        if (follow.isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "본인 프로필은 팔로우/언팔로우 할 수 없습니다");
+                "이미 팔로우한 계정입니다.");
         }
 
-        Optional<Profile> followingProfile = profileRepository.findById(profileId);
-        if (followingProfile.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "존재하지 않는 프로필입니다." + profileId);
-        }
-
-        Follows follows = Follows.builder()
-            .followers(myProfile.get())
-            .followings(followingProfile.get())
+        Follows newFollow = Follows.builder()
+            .followers(myProfile)
+            .followings(followingProfile)
             .build();
 
-        followsRepository.save(follows);
+        followsRepository.save(newFollow);
 
-        return FollowsResponseDto.of(follows);
+        return FollowsResponseDto.of(newFollow);
     }
 
 
@@ -61,26 +54,12 @@ public class FollowsServiceImpl implements FollowsService {
     @Transactional
     public void unfollow(JwtPayload jwtPayload, Long followingId) {
 
-        Optional<Profile> myProfile =
-            profileRepository.findById(jwtPayload.getProfileId());
-        if (myProfile.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "존재하지 않는 프로필입니다." + jwtPayload.getProfileId());
-        }
-
-        Optional<Profile> followingProfile = profileRepository.findById(followingId);
-        if (followingProfile.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "존재하지 않는 프로필입니다." + followingId);
-        }
-
-        if (myProfile.get().getId().equals(followingId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "본인 프로필은 팔로우/언팔로우 할 수 없습니다");
-        }
+        Profile myProfile = getProfileOrThrow(jwtPayload.getProfileId());
+        Profile followingProfile = getProfileOrThrow(followingId);
+        validateNotSelf(myProfile, followingId);
 
         Optional<Follows> follows =
-            followsRepository.findByFollowersAndFollowings(myProfile.get(), followingProfile.get());
+            followsRepository.findByFollowersAndFollowings(myProfile, followingProfile);
         if (follows.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "존재하지 않는 팔로우입니다.");
@@ -129,5 +108,24 @@ public class FollowsServiceImpl implements FollowsService {
                 profile.getUpdatedAt()
             ))
             .toList();
+    }
+
+    private Profile getProfileOrThrow(Long profileId) {
+        Optional<Profile> optionalProfile =
+            profileRepository.findById(profileId);
+
+        if (optionalProfile.isEmpty()) {
+            throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "존재하지 않는 프로필입니다. id = " + profileId);
+        }
+
+        return optionalProfile.get();
+    }
+
+    private void validateNotSelf(Profile me, Long profileId) {
+        if (me.getId().equals(profileId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "본인 프로필은 팔로우/언팔로우 할 수 없습니다");
+        }
     }
 }
