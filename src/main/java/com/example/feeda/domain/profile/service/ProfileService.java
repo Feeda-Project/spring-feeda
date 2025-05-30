@@ -94,10 +94,14 @@ public class ProfileService {
      * 프로필 수정 기능
      */
     @Transactional
-    public UpdateProfileResponseDto updateProfile(Long id, UpdateProfileRequestDto requestDto) {
+    public UpdateProfileResponseDto updateProfile(Long userId, Long profileId, UpdateProfileRequestDto requestDto) {
 
-        Profile profile = profileRepository.findById(id)
+        Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "회원 없음."));
+
+        if (!profile.getAccount().getId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "수정 권한이 없습니다.");
+        }
 
         profile.updateProfile(
                 requestDto.getNickname(),

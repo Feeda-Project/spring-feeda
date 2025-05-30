@@ -30,8 +30,8 @@ public class Profile extends BaseEntity {
     private Account account;
 
     //프로필 생성해줄때 사용
-    public static Profile create(String nickname, Date birth, String bio) {
-        return new Profile(null, nickname, birth, bio, null, null);
+    public static Profile create(String nickname, Date birth, String bio, Account account) {
+        return new Profile(null, nickname, birth, bio, null, null, account);
     }
 
     public Profile(String nickname, Date birth, String bio) {
@@ -40,18 +40,24 @@ public class Profile extends BaseEntity {
         this.bio = bio;
     }
 
-    public Profile(Long id, String nickname, Date birth, String bio, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Profile(Long id, String nickname, Date birth, String bio, LocalDateTime createdAt, LocalDateTime updatedAt, Account account) {
         super(updatedAt, createdAt);
         this.id = id;
         this.nickname = nickname;
         this.birth = birth;
         this.bio = bio;
-
+        this.account = account;
     }
 
     public void updateProfile(String nickname, Date birth, String bio) {
-        this.nickname = nickname;
-        this.birth = birth;
-        this.bio = bio;
+        if (nickname != null) {
+            this.nickname = nickname;
+        }
+        if (birth != null) {
+            this.birth = birth;
+        }
+        if (bio != null) {
+            this.bio = bio;
+        }
     }
 }
