@@ -32,9 +32,6 @@ public class Comment {
     private Profile profile;
 
     @Column(nullable = false)
-    private String title;
-
-    @Column(nullable = false)
     private String content;
 
     @CreatedDate
@@ -45,10 +42,13 @@ public class Comment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Comment(Post post, Profile profile, String title, String content) {
+    public Comment(Post post, Profile profile, String content) {
         this.post = post;
         this.profile = profile;
-        this.title = title;
+        this.content = content;
+    }
+
+    public void updateContent(String content) {
         this.content = content;
     }
 }
