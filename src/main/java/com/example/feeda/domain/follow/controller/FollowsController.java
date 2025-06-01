@@ -2,19 +2,25 @@ package com.example.feeda.domain.follow.controller;
 
 import com.example.feeda.domain.follow.dto.FollowsResponseDto;
 import com.example.feeda.domain.follow.service.FollowsService;
-import com.example.feeda.domain.profile.dto.GetProfileResponseDto;
+import com.example.feeda.domain.profile.dto.ProfileListResponseDto;
 import com.example.feeda.security.jwt.JwtPayload;
-import java.util.List;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/follows")
@@ -39,30 +45,50 @@ public class FollowsController {
     }
 
     @GetMapping("/{profileId}/followings")
-    public List<GetProfileResponseDto> getFollowings(@PathVariable Long profileId,
+    public ProfileListResponseDto getFollowings(@PathVariable Long profileId,
+        @RequestParam(defaultValue = "1") @Min(1) Integer page,
+        @RequestParam(defaultValue = "10") @Min(5) Integer size,
         @AuthenticationPrincipal JwtPayload jwtPayload) {
 
-        return followsService.findFollowings(profileId, jwtPayload);
+        Pageable pageable = PageRequest
+            .of(page - 1, size, Direction.DESC, "createdAt");
+
+        return followsService.findFollowingsPage(profileId, jwtPayload, pageable);
     }
 
     @GetMapping("/{profileId}/followers")
-    public List<GetProfileResponseDto> getFollowers(@PathVariable Long profileId,
+    public ProfileListResponseDto getFollowers(@PathVariable Long profileId,
+        @RequestParam(defaultValue = "1") @Min(1) Integer page,
+        @RequestParam(defaultValue = "10") @Min(5) Integer size,
         @AuthenticationPrincipal JwtPayload jwtPayload) {
 
-        return followsService.findFollowers(profileId, jwtPayload);
+        Pageable pageable = PageRequest
+            .of(page - 1, size, Direction.DESC, "createdAt");
+
+        return followsService.findFollowersPage(profileId, jwtPayload, pageable);
     }
 
     @GetMapping("/followings")
-    public List<GetProfileResponseDto> getMyFollowings(
-        @AuthenticationPrincipal JwtPayload jwtPayload) {
+    public ProfileListResponseDto getMyFollowings(
+        @AuthenticationPrincipal JwtPayload jwtPayload,
+        @RequestParam(defaultValue = "1") @Min(1) Integer page,
+        @RequestParam(defaultValue = "10") @Min(5) Integer size) {
 
-        return followsService.findFollowings(jwtPayload.getProfileId(), jwtPayload);
+        Pageable pageable = PageRequest
+            .of(page - 1, size, Direction.DESC, "createdAt");
+
+        return followsService.findFollowingsPage(jwtPayload.getProfileId(), jwtPayload, pageable);
     }
 
     @GetMapping("/followers")
-    public List<GetProfileResponseDto> getMyFollowers(
-        @AuthenticationPrincipal JwtPayload jwtPayload) {
+    public ProfileListResponseDto getMyFollowers(
+        @AuthenticationPrincipal JwtPayload jwtPayload,
+        @RequestParam(defaultValue = "1") @Min(1) Integer page,
+        @RequestParam(defaultValue = "10") @Min(5) Integer size) {
 
-        return followsService.findFollowers(jwtPayload.getProfileId(), jwtPayload);
+        Pageable pageable = PageRequest
+            .of(page - 1, size, Direction.DESC, "createdAt");
+
+        return followsService.findFollowersPage(jwtPayload.getProfileId(), jwtPayload, pageable);
     }
 }

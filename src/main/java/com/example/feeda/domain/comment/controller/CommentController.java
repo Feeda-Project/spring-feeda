@@ -4,9 +4,12 @@ import com.example.feeda.domain.comment.dto.CommentResponse;
 import com.example.feeda.domain.comment.dto.CreateCommentRequest;
 import com.example.feeda.domain.comment.dto.UpdateCommentRequest;
 import com.example.feeda.domain.comment.service.CommentService;
+import com.example.feeda.domain.comment.dto.LikeCommentResponseDTO;
+import com.example.feeda.domain.comment.service.CommentLikeService;
 import com.example.feeda.security.jwt.JwtPayload;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -18,9 +21,10 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 public class CommentController {
 
+    private final CommentLikeService commentLikeService;
     private final CommentService commentService;
 
-    // 댓글 작성 - 게시글에 대한 댓글 생성
+    // 댓글 작성
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentResponse> createComment(
             @PathVariable Long postId,
@@ -32,7 +36,7 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
-    // 댓글 수정 - 특정 댓글 수정
+    // 댓글 수정
     @PutMapping("/comments/{commentId}")
     public ResponseEntity<CommentResponse> updateComment(
             @PathVariable Long commentId,
@@ -44,7 +48,7 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
-    // 댓글 삭제 - 특정 댓글 삭제
+    // 댓글 삭제
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long commentId,
@@ -54,6 +58,27 @@ public class CommentController {
         commentService.deleteComment(commentId, profileId);
         return ResponseEntity.noContent().build();
     }
+
+    // 댓글 좋아요
+    @PostMapping("/comments/{id}/likes")
+    public ResponseEntity<LikeCommentResponseDTO> likeComment(
+            @PathVariable Long id,
+            @AuthenticationPrincipal JwtPayload jwtPayload
+    ) {
+        Long profileId = jwtPayload.getProfileId();
+        return new ResponseEntity<>(
+                commentLikeService.likeComment(id, profileId),
+                HttpStatus.OK
+        );
+    }
+
+    // 댓글 좋아요 취소
+    @DeleteMapping("/comments/{id}/likes")
+    public ResponseEntity<Void> unlikeComment(
+            @PathVariable Long id,
+            @AuthenticationPrincipal JwtPayload jwtPayload
+    ) {
+        commentLikeService.unlikeComment(id, jwtPayload.getProfileId());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
-
-
