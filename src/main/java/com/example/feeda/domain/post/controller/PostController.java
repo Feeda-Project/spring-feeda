@@ -58,8 +58,10 @@ public class PostController {
             @PathVariable Long id,
             @AuthenticationPrincipal JwtPayload jwtPayload
     ) {
-        postService.deleteLikes(id, jwtPayload.getProfileId());
-        return new ResponseEntity<>(HttpStatus.OK);
+        Long profileId = jwtPayload.getProfileId();
+        postService.deleteLikes(id, profileId);
+
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")

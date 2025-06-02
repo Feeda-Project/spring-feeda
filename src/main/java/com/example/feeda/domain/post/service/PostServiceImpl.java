@@ -70,13 +70,16 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void deleteLikes(Long id, Long profileId) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
-        Profile profile = profileRepository.findById(profileId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 프로필"));
-        Optional<PostLike> byPostAndProfile = postLikeRepository.findByPostAndProfile(post, profile);
-        PostLike postLike = byPostAndProfile.get();
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
+
+        Profile profile = profileRepository.findById(profileId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 프로필"));
+
+        PostLike postLike = postLikeRepository.findByPostAndProfile(post, profile)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 사용자의 좋아요가 존재하지 않습니다."));
+
         postLikeRepository.delete(postLike);
-
-
     }
 
     @Override
