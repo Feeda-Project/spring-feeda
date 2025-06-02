@@ -1,5 +1,6 @@
 package com.example.feeda.domain.post.service;
 
+import com.example.feeda.domain.comment.repository.CommentRepository;
 import com.example.feeda.domain.follow.entity.Follows;
 import com.example.feeda.domain.follow.repository.FollowsRepository;
 import com.example.feeda.domain.post.dto.PostLikeResponseDTO;
@@ -14,10 +15,9 @@ import com.example.feeda.domain.profile.repository.ProfileRepository;
 import com.example.feeda.exception.CustomResponseException;
 import com.example.feeda.exception.enums.ResponseError;
 import com.example.feeda.security.jwt.JwtPayload;
-
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +34,7 @@ public class PostServiceImpl implements PostService {
     private final ProfileRepository profileRepository; // 현재 로그인 사용자 정보를 찾기 위해 필요
     private final FollowsRepository followsRepository;
     private final PostLikeRepository postLikeRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public PostResponseDto createPost(PostRequestDto postRequestDto, JwtPayload jwtPayload) {
@@ -43,11 +44,11 @@ public class PostServiceImpl implements PostService {
                 () -> new CustomResponseException(ResponseError.PROFILE_NOT_FOUND));
 
         Post post = new Post(postRequestDto.getTitle(), postRequestDto.getContent(),
-                postRequestDto.getCategory(), profile);
+            postRequestDto.getCategory(), profile);
 
         Post savedPost = postRepository.save(post);
 
-        return new PostResponseDto(savedPost, 0L);
+        return new PostResponseDto(savedPost, 0L, 0L);
     }
 
     @Override
@@ -92,16 +93,37 @@ public class PostServiceImpl implements PostService {
         Post findPost = optionalPost.get();
 
         Long likeCount = postLikeRepository.countByPost(findPost);
+        Long commentCount = commentRepository.countByPost(findPost);
 
-        return new PostResponseDto(findPost, likeCount);
+        return new PostResponseDto(findPost, likeCount, commentCount);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostResponseDto> findAll(Pageable pageable, String keyword) {
+    public Page<PostResponseDto> findAll(Pageable pageable, String keyword,
+        LocalDate startUpdatedAt, LocalDate endUpdatedAt) {
+
+        if ((startUpdatedAt == null && endUpdatedAt != null) || (startUpdatedAt != null
+            && endUpdatedAt == null)) {
+            throw new CustomResponseException(ResponseError.INVALID_DATE_PARAMETERS);
+        }
+
+        if (startUpdatedAt != null) {
+            return postRepository.findAllByTitleContainingAndUpdatedAtBetween(
+                    keyword, startUpdatedAt.atStartOfDay(), endUpdatedAt.atTime(23, 59, 59), pageable)
+                .map(post -> new PostResponseDto(
+                        post,
+                        postLikeRepository.countByPost(post),
+                        commentRepository.countByPost(post)
+                ));
+        }
 
         return postRepository.findAllByTitleContaining(keyword, pageable)
-                .map(post -> new PostResponseDto(post, postLikeRepository.countByPost(post)));
+            .map(post -> new PostResponseDto(
+                    post,
+                    postLikeRepository.countByPost(post),
+                    commentRepository.countByPost(post)
+            ));
     }
 
     @Override
@@ -109,17 +131,21 @@ public class PostServiceImpl implements PostService {
     public Page<PostResponseDto> findFollowingAllPost(Pageable pageable, JwtPayload jwtPayload) {
 
         Page<Follows> followings = followsRepository.findAllByFollowers_Id(
-                jwtPayload.getProfileId(), pageable);
+            jwtPayload.getProfileId(), pageable);
 
         List<Long> followingProfileIds = followings.stream()
-                .map(following -> following.getFollowings().getId())
-                .toList();
+            .map(following -> following.getFollowings().getId())
+            .toList();
 
         Pageable newPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                Sort.Direction.DESC, "updatedAt");
+            Sort.Direction.DESC, "updatedAt");
 
         return postRepository.findAllByProfile_IdIn(followingProfileIds, newPageable)
-                .map(post -> new PostResponseDto(post, postLikeRepository.countByPost(post)));
+            .map(post -> new PostResponseDto(
+                    post,
+                    postLikeRepository.countByPost(post),
+                    commentRepository.countByPost(post)
+            ));
     }
 
     @Override
@@ -137,8 +163,9 @@ public class PostServiceImpl implements PostService {
         Post savedPost = postRepository.save(findPost);
 
         Long likeCount = postLikeRepository.countByPost(findPost);
+        Long commentCount = commentRepository.countByPost(findPost);
 
-        return new PostResponseDto(savedPost, likeCount);
+        return new PostResponseDto(savedPost, likeCount, commentCount);
     }
 
     @Override

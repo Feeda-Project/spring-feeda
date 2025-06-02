@@ -18,16 +18,19 @@ public class PostResponseDto {
 
     private final Long likes;
 
+    private final Long comments;
+
     private final LocalDateTime createdAt;
 
     private final LocalDateTime updatedAt;
 
-    public PostResponseDto(Post post, Long likes) {
+    public PostResponseDto(Post post, Long likes, Long comments) {
         this.id = post.getId();
         this.title = post.getTitle();
         this.content = post.getContent();
         this.category = post.getCategory();
         this.likes = likes;
+        this.comments = comments;
         this.createdAt = post.getCreatedAt();
         this.updatedAt = post.getUpdatedAt();
     }
