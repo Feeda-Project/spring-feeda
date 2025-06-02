@@ -31,8 +31,4 @@ public class PostResponseDto {
         this.createdAt = post.getCreatedAt();
         this.updatedAt = post.getUpdatedAt();
     }
-
-    public static PostResponseDto toDto(Post post, Long likes) {
-        return new PostResponseDto(post, likes);
-    }
 }
