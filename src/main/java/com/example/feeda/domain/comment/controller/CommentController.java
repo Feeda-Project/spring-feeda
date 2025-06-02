@@ -15,6 +15,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -25,7 +27,7 @@ public class CommentController {
     private final CommentService commentService;
 
     // 댓글 작성
-    @PostMapping("/posts/{postId}/comments")
+    @PostMapping("/comments/posts/{postId}")
     public ResponseEntity<CommentResponse> createComment(
             @PathVariable Long postId,
             @AuthenticationPrincipal JwtPayload jwtPayload,
@@ -35,6 +37,24 @@ public class CommentController {
         CommentResponse response = commentService.createComment(postId, profileId, request);
         return ResponseEntity.ok(response);
     }
+
+    // 댓글 전체 조회 (게시글 기준, 정렬/필터 가능)
+    @GetMapping("/comments/posts/{postId}")
+    public ResponseEntity<List<CommentResponse>> getCommentsByPostId(
+            @PathVariable Long postId,
+            @RequestParam(defaultValue = "latest") String sort // latest 또는 oldest
+    ) {
+        List<CommentResponse> comments = commentService.getCommentsByPostId(postId, sort);
+        return ResponseEntity.ok(comments);
+    }
+
+    // 댓글 단건 조회
+    @GetMapping("/comments/{commentId}")
+    public ResponseEntity<CommentResponse> getCommentById(@PathVariable Long commentId) {
+        CommentResponse response = commentService.getCommentById(commentId);
+        return ResponseEntity.ok(response);
+    }
+
 
     // 댓글 수정
     @PutMapping("/comments/{commentId}")

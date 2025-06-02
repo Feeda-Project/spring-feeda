@@ -2,23 +2,31 @@ package com.example.feeda.domain.post.controller;
 
 import com.example.feeda.domain.post.dto.PostRequestDto;
 import com.example.feeda.domain.post.dto.PostResponseDto;
-import com.example.feeda.domain.post.entity.Post;
 import com.example.feeda.domain.post.service.PostService;
+import com.example.feeda.security.jwt.JwtPayload;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Validated
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
 public class PostController {
@@ -26,44 +34,57 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<PostResponseDto> createPost(@RequestBody PostRequestDto requestDto) {
+    public ResponseEntity<PostResponseDto> createPost(@RequestBody PostRequestDto requestDto,
+        @AuthenticationPrincipal JwtPayload jwtPayload) {
 
-        PostResponseDto post = postService.createPost(requestDto.getTitle(), requestDto.getContent(), requestDto.getCategory());
+        PostResponseDto post = postService.createPost(requestDto, jwtPayload);
 
-        return new ResponseEntity<>(post,
-                HttpStatus.CREATED);
+        return new ResponseEntity<>(post, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponseDto> findPostById(@PathVariable Long id) {
+    public ResponseEntity<PostResponseDto> findPostById(@PathVariable @NotNull Long id) {
         return new ResponseEntity<>(postService.findPostById(id), HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<Page<PostResponseDto>> findAllPost(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "") String keyword
+        @RequestParam(defaultValue = "1") @Min(1) int page,
+        @RequestParam(defaultValue = "10") @Min(1) int size,
+        @RequestParam(defaultValue = "") String keyword
     ) {
-        if (page < 1 || size < 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "page 와 size 는 1 이상의 값이어야 합니다.");
-        }
+
         Pageable pageable = PageRequest.of(page - 1, size, Sort.Direction.DESC, "updatedAt");
 
         return new ResponseEntity<>(postService.findAll(pageable, keyword), HttpStatus.OK);
     }
 
+    @GetMapping("/followings")
+    public ResponseEntity<Page<PostResponseDto>> findFollowingAllPost(
+        @RequestParam(defaultValue = "1") @Min(1) int page,
+        @RequestParam(defaultValue = "10") @Min(1) int size,
+        @AuthenticationPrincipal JwtPayload jwtPayload
+    ) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        return new ResponseEntity<>(postService.findFollowingAllPost(pageable, jwtPayload),
+            HttpStatus.OK);
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<Post> updatePost(
-            @PathVariable Long id,
-            @RequestBody PostRequestDto requestDto) {
-        Post post = postService.updatePost(id, requestDto);
+    public ResponseEntity<PostResponseDto> updatePost(
+        @PathVariable @NotNull Long id,
+        @RequestBody PostRequestDto requestDto, @AuthenticationPrincipal JwtPayload jwtPayload) {
+
+        PostResponseDto post = postService.updatePost(id, requestDto, jwtPayload);
         return new ResponseEntity<>(post, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        postService.deletePost(id);
+    public ResponseEntity<Void> deletePost(@PathVariable @NotNull Long id,
+        @AuthenticationPrincipal JwtPayload jwtPayload) {
+
+        postService.deletePost(id, jwtPayload);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
