@@ -9,6 +9,7 @@ import com.example.feeda.domain.post.repository.PostRepository;
 import com.example.feeda.domain.profile.entity.Profile;
 import com.example.feeda.domain.profile.repository.ProfileRepository;
 import com.example.feeda.security.jwt.JwtPayload;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class PostServiceImpl implements PostService {
 
         Post post = new Post(postRequestDto.getTitle(), postRequestDto.getContent(),
             postRequestDto.getCategory(), profile);
-        
+
         Post savedPost = postRepository.save(post);
 
         return new PostResponseDto(savedPost.getId(),
@@ -64,7 +65,21 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostResponseDto> findAll(Pageable pageable, String keyword) {
+    public Page<PostResponseDto> findAll(Pageable pageable, String keyword,
+        LocalDateTime startUpdatedAt, LocalDateTime endUpdatedAt) {
+
+        if ((startUpdatedAt == null && endUpdatedAt != null) || (startUpdatedAt != null
+            && endUpdatedAt == null)) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "startUpdatedAt과 endUpdatedAt은 둘 다 있어야 하거나 둘 다 없어야 합니다.");
+        }
+
+        if (startUpdatedAt != null) {
+            return postRepository.findAllByTitleContainingAndUpdatedAtBetween(
+                    keyword, startUpdatedAt, endUpdatedAt, pageable)
+                .map(PostResponseDto::toDto);
+        }
 
         return postRepository.findAllByTitleContaining(keyword, pageable)
             .map(PostResponseDto::toDto);
