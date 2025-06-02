@@ -8,6 +8,8 @@ import com.example.feeda.domain.post.entity.Post;
 import com.example.feeda.domain.post.repository.PostRepository;
 import com.example.feeda.domain.profile.entity.Profile;
 import com.example.feeda.domain.profile.repository.ProfileRepository;
+import com.example.feeda.exception.CustomResponseException;
+import com.example.feeda.exception.enums.ResponseError;
 import com.example.feeda.security.jwt.JwtPayload;
 import java.util.List;
 import java.util.Optional;
@@ -16,10 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public class PostServiceImpl implements PostService {
 
         Profile profile = profileRepository.findById(jwtPayload.getProfileId())
             .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 프로필입니다."));
+                () -> new CustomResponseException(ResponseError.PROFILE_NOT_FOUND));
 
         Post post = new Post(postRequestDto.getTitle(), postRequestDto.getContent(),
             postRequestDto.getCategory(), profile);
@@ -53,7 +53,7 @@ public class PostServiceImpl implements PostService {
         Optional<Post> optionalPost = postRepository.findById(id);
 
         if (optionalPost.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다");
+            throw new CustomResponseException(ResponseError.POST_NOT_FOUND);
         }
 
         Post findPost = optionalPost.get();
@@ -93,10 +93,10 @@ public class PostServiceImpl implements PostService {
     public PostResponseDto updatePost(Long id, PostRequestDto requestDto, JwtPayload jwtPayload) {
 
         Post findPost = postRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 게시글"));
+            .orElseThrow(() -> new CustomResponseException(ResponseError.POST_NOT_FOUND));
 
         if (!findPost.getProfile().getId().equals(jwtPayload.getProfileId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
+            throw new CustomResponseException(ResponseError.NO_PERMISSION_TO_EDIT);
         }
 
         findPost.update(requestDto.getTitle(), requestDto.getCategory(), requestDto.getCategory());
@@ -113,10 +113,10 @@ public class PostServiceImpl implements PostService {
     public void deletePost(Long id, JwtPayload jwtPayload) {
 
         Post findPost = postRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 게시글"));
+            .orElseThrow(() -> new CustomResponseException(ResponseError.POST_NOT_FOUND));
 
         if (!findPost.getProfile().getId().equals(jwtPayload.getProfileId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
+            throw new CustomResponseException(ResponseError.NO_PERMISSION_TO_DELETE);
         }
 
         postRepository.delete(findPost);

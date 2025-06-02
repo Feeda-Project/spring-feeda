@@ -49,7 +49,7 @@ public class JwtUtil {
             return tokenValue.substring(BEARER_PREFIX.length()); // "Bearer " 제거 후 반환
         }
 
-        throw new TokenNotFoundException("Not Found Token");
+        throw new TokenNotFoundException("토큰을 찾을 수 없습니다.");
     }
 
     public Claims extractClaims(String token) {

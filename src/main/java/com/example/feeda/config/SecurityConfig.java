@@ -1,9 +1,10 @@
 package com.example.feeda.config;
 
 import com.example.feeda.filter.JwtFilter;
+import com.example.feeda.security.handler.CustomAccessDeniedHandler;
+import com.example.feeda.security.handler.CustomAuthenticationEntryPoint;
 import com.example.feeda.security.jwt.JwtBlacklistService;
 import com.example.feeda.security.jwt.JwtUtil;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final JwtBlacklistService jwtBlacklistService;
     private final JwtUtil jwtUtil;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -43,10 +46,6 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/**").authenticated()
 
-                        // 비로그인 시 GET 만 허용
-//                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
-//                        .requestMatchers("/api/**").permitAll()
-
                         .anyRequest().denyAll()
                 )
 
@@ -55,20 +54,8 @@ public class SecurityConfig {
 
                 .exceptionHandling(configurer ->
                         configurer
-                                .authenticationEntryPoint((request, response, authException) -> {
-                                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                                    response.setContentType("application/json;charset=UTF-8");
-
-                                    String message = "{\"error\": \"인증 실패: " + authException.getMessage() + "\"}";
-                                    response.getWriter().write(message);
-                                })
-                                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                                    response.setContentType("application/json;charset=UTF-8");
-
-                                    String message = "{\"error\": \"접근 거부: " + accessDeniedException.getMessage() + "\"}";
-                                    response.getWriter().write(message);
-                                })
+                                .authenticationEntryPoint(customAuthenticationEntryPoint)
+                                .accessDeniedHandler(customAccessDeniedHandler)
                 )
 
                 .build();

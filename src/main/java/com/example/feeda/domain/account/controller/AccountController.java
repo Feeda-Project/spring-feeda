@@ -1,10 +1,11 @@
 package com.example.feeda.domain.account.controller;
 
-import com.example.feeda.domain.account.sevice.AccountService;
+import com.example.feeda.domain.account.sevice.AccountServiceImpl;
 import com.example.feeda.domain.account.dto.*;
 import com.example.feeda.security.jwt.JwtBlacklistService;
 import com.example.feeda.security.jwt.JwtPayload;
 import com.example.feeda.security.jwt.JwtUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,12 +17,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class AccountController {
-    private final AccountService accountService;
+    private final AccountServiceImpl accountService;
     private final JwtBlacklistService jwtBlacklistService;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/accounts")
-    public ResponseEntity<UserResponseDTO> signup(@RequestBody SignUpRequestDTO requestDTO) {
+    public ResponseEntity<UserResponseDTO> signup(@RequestBody @Valid SignUpRequestDTO requestDTO) {
         return new ResponseEntity<>(accountService.signup(requestDTO), HttpStatus.CREATED);
     }
 
@@ -29,7 +30,7 @@ public class AccountController {
     public ResponseEntity<Void> deleteAccount(
             @RequestHeader("Authorization") String bearerToken,
             @AuthenticationPrincipal JwtPayload jwtPayload,
-            @RequestBody DeleteAccountRequestDTO requestDTO
+            @RequestBody @Valid DeleteAccountRequestDTO requestDTO
     ) {
         accountService.deleteAccount(jwtPayload.getAccountId(), requestDTO.getPassword());
 
@@ -42,14 +43,14 @@ public class AccountController {
     @PatchMapping("/accounts/password")
     public ResponseEntity<UserResponseDTO> updatePassword(
             @AuthenticationPrincipal JwtPayload jwtPayload,
-            @RequestBody UpdatePasswordRequestDTO requestDTO
+            @RequestBody @Valid UpdatePasswordRequestDTO requestDTO
     ) {
         return new ResponseEntity<>(accountService.updatePassword(jwtPayload.getAccountId(), requestDTO), HttpStatus.OK);
     }
 
     @PostMapping("/accounts/login")
     public ResponseEntity<UserResponseDTO> login(
-            @RequestBody LogInRequestDTO requestDTO
+            @RequestBody @Valid LogInRequestDTO requestDTO
     ) {
         UserResponseDTO responseDTO = accountService.login(requestDTO);
 
