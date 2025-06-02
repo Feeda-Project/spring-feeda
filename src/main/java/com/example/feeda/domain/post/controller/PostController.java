@@ -7,11 +7,13 @@ import com.example.feeda.domain.post.service.PostService;
 import com.example.feeda.security.jwt.JwtPayload;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,8 +48,8 @@ public class PostController {
 
     @PostMapping("/{id}/likes")
     public ResponseEntity<PostLikeResponseDTO> makeLikes(
-            @PathVariable Long id,
-            @AuthenticationPrincipal JwtPayload jwtPayload) {
+        @PathVariable Long id,
+        @AuthenticationPrincipal JwtPayload jwtPayload) {
 
         Long profileId = jwtPayload.getProfileId();
         return new ResponseEntity<>(postService.makeLikes(id, jwtPayload), HttpStatus.OK);
@@ -55,8 +57,8 @@ public class PostController {
 
     @DeleteMapping("/{id}/likes")
     public ResponseEntity<Void> deleteLikes(
-            @PathVariable Long id,
-            @AuthenticationPrincipal JwtPayload jwtPayload
+        @PathVariable Long id,
+        @AuthenticationPrincipal JwtPayload jwtPayload
     ) {
         Long profileId = jwtPayload.getProfileId();
         postService.deleteLikes(id, profileId);
@@ -73,12 +75,15 @@ public class PostController {
     public ResponseEntity<Page<PostResponseDto>> findAllPost(
         @RequestParam(defaultValue = "1") @Min(1) int page,
         @RequestParam(defaultValue = "10") @Min(1) int size,
-        @RequestParam(defaultValue = "") String keyword
+        @RequestParam(defaultValue = "") String keyword,
+        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startUpdatedAt,
+        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endUpdatedAt
     ) {
 
         Pageable pageable = PageRequest.of(page - 1, size, Sort.Direction.DESC, "updatedAt");
 
-        return new ResponseEntity<>(postService.findAll(pageable, keyword), HttpStatus.OK);
+        return new ResponseEntity<>(
+            postService.findAll(pageable, keyword, startUpdatedAt, endUpdatedAt), HttpStatus.OK);
     }
 
     @GetMapping("/followings")

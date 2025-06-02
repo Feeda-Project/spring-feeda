@@ -1,5 +1,6 @@
 package com.example.feeda.domain.post.service;
 
+import com.example.feeda.domain.comment.repository.CommentRepository;
 import com.example.feeda.domain.follow.entity.Follows;
 import com.example.feeda.domain.follow.repository.FollowsRepository;
 import com.example.feeda.domain.post.dto.PostLikeResponseDTO;
@@ -12,10 +13,9 @@ import com.example.feeda.domain.post.repository.PostRepository;
 import com.example.feeda.domain.profile.entity.Profile;
 import com.example.feeda.domain.profile.repository.ProfileRepository;
 import com.example.feeda.security.jwt.JwtPayload;
-
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,27 +35,30 @@ public class PostServiceImpl implements PostService {
     private final ProfileRepository profileRepository; // 현재 로그인 사용자 정보를 찾기 위해 필요
     private final FollowsRepository followsRepository;
     private final PostLikeRepository postLikeRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public PostResponseDto createPost(PostRequestDto postRequestDto, JwtPayload jwtPayload) {
 
         Profile profile = profileRepository.findById(jwtPayload.getProfileId())
-                .orElseThrow(
-                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 프로필입니다."));
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 프로필입니다."));
 
         Post post = new Post(postRequestDto.getTitle(), postRequestDto.getContent(),
-                postRequestDto.getCategory(), profile);
+            postRequestDto.getCategory(), profile);
 
         Post savedPost = postRepository.save(post);
 
-        return new PostResponseDto(savedPost, 0L);
+        return new PostResponseDto(savedPost, 0L, 0L);
     }
 
     @Override
     @Transactional
     public PostLikeResponseDTO makeLikes(Long id, JwtPayload jwtPayload) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
-        Profile profile = profileRepository.findById(jwtPayload.getProfileId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "프로필이 존재하지 않습니다."));
+        Post post = postRepository.findById(id).orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
+        Profile profile = profileRepository.findById(jwtPayload.getProfileId()).orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "프로필이 존재하지 않습니다."));
         ;
 
         // 중복 좋아요 방지
@@ -71,13 +74,15 @@ public class PostServiceImpl implements PostService {
     @Override
     public void deleteLikes(Long id, Long profileId) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
 
         Profile profile = profileRepository.findById(profileId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 프로필"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 프로필"));
 
         PostLike postLike = postLikeRepository.findByPostAndProfile(post, profile)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 사용자의 좋아요가 존재하지 않습니다."));
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 사용자의 좋아요가 존재하지 않습니다."));
 
         postLikeRepository.delete(postLike);
     }
@@ -94,16 +99,33 @@ public class PostServiceImpl implements PostService {
         Post findPost = optionalPost.get();
 
         Long likeCount = postLikeRepository.countByPost(findPost);
+        Long commentCount = commentRepository.countByPost(findPost);
 
-        return new PostResponseDto(findPost, likeCount);
+        return new PostResponseDto(findPost, likeCount, commentCount);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostResponseDto> findAll(Pageable pageable, String keyword) {
+    public Page<PostResponseDto> findAll(Pageable pageable, String keyword,
+        LocalDate startUpdatedAt, LocalDate endUpdatedAt) {
+
+        if ((startUpdatedAt == null && endUpdatedAt != null) || (startUpdatedAt != null
+            && endUpdatedAt == null)) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "startUpdatedAt과 endUpdatedAt은 둘 다 있어야 하거나 둘 다 없어야 합니다.");
+        }
+
+        if (startUpdatedAt != null) {
+            return postRepository.findAllByTitleContainingAndUpdatedAtBetween(
+                    keyword, startUpdatedAt.atStartOfDay(), endUpdatedAt.atTime(23, 59, 59), pageable)
+                .map(post -> PostResponseDto.toDto(post, postLikeRepository.countByPost(post),
+                    commentRepository.countByPost(post)));
+        }
 
         return postRepository.findAllByTitleContaining(keyword, pageable)
-                .map(post -> PostResponseDto.toDto(post, postLikeRepository.countByPost(post)));
+            .map(post -> PostResponseDto.toDto(post, postLikeRepository.countByPost(post),
+                commentRepository.countByPost(post)));
     }
 
     @Override
@@ -111,17 +133,18 @@ public class PostServiceImpl implements PostService {
     public Page<PostResponseDto> findFollowingAllPost(Pageable pageable, JwtPayload jwtPayload) {
 
         Page<Follows> followings = followsRepository.findAllByFollowers_Id(
-                jwtPayload.getProfileId(), pageable);
+            jwtPayload.getProfileId(), pageable);
 
         List<Long> followingProfileIds = followings.stream()
-                .map(following -> following.getFollowings().getId())
-                .toList();
+            .map(following -> following.getFollowings().getId())
+            .toList();
 
         Pageable newPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                Sort.Direction.DESC, "updatedAt");
+            Sort.Direction.DESC, "updatedAt");
 
         return postRepository.findAllByProfile_IdIn(followingProfileIds, newPageable)
-                .map(post -> PostResponseDto.toDto(post, postLikeRepository.countByPost(post)));
+            .map(post -> PostResponseDto.toDto(post, postLikeRepository.countByPost(post),
+                commentRepository.countByPost(post)));
     }
 
     @Override
@@ -129,7 +152,7 @@ public class PostServiceImpl implements PostService {
     public PostResponseDto updatePost(Long id, PostRequestDto requestDto, JwtPayload jwtPayload) {
 
         Post findPost = postRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 게시글"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 게시글"));
 
         if (!findPost.getProfile().getId().equals(jwtPayload.getProfileId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
@@ -139,8 +162,9 @@ public class PostServiceImpl implements PostService {
         Post savedPost = postRepository.save(findPost);
 
         Long likeCount = postLikeRepository.countByPost(findPost);
+        Long commentCount = commentRepository.countByPost(findPost);
 
-        return new PostResponseDto(savedPost, likeCount);
+        return new PostResponseDto(savedPost, likeCount, commentCount);
     }
 
     @Override
@@ -148,7 +172,7 @@ public class PostServiceImpl implements PostService {
     public void deletePost(Long id, JwtPayload jwtPayload) {
 
         Post findPost = postRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 게시글"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 게시글"));
 
         if (!findPost.getProfile().getId().equals(jwtPayload.getProfileId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
