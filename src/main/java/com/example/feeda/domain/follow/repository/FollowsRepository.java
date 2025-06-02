@@ -16,4 +16,10 @@ public interface FollowsRepository extends JpaRepository<Follows, Long> {
     Page<Follows> findAllByFollowings_Id(Long followingsId, Pageable pageable);
 
     Page<Follows> findAllByFollowers_Id(Long followersId, Pageable pageable);
+
+    // 팔로워 목록
+    Long countByFollowings_Id(Long followingsId);
+
+    // 팔로잉 목록
+    Long countByFollowers_Id(Long followersId);
 }

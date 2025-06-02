@@ -1,9 +1,6 @@
 package com.example.feeda.domain.profile.controller;
 
-import com.example.feeda.domain.profile.dto.GetProfileResponseDto;
-import com.example.feeda.domain.profile.dto.ProfileListResponseDto;
-import com.example.feeda.domain.profile.dto.UpdateProfileRequestDto;
-import com.example.feeda.domain.profile.dto.UpdateProfileResponseDto;
+import com.example.feeda.domain.profile.dto.*;
 import com.example.feeda.domain.profile.service.ProfileService;
 import com.example.feeda.security.jwt.JwtPayload;
 import jakarta.validation.Valid;
@@ -27,8 +24,8 @@ public class ProfileController {
      */
 
     @GetMapping("/profiles/{id}")
-    public ResponseEntity<GetProfileResponseDto> getProfile(@PathVariable Long id) {
-        GetProfileResponseDto responseDto = profileService.getProfile(id);
+    public ResponseEntity<GetProfileWithFollowCountResponseDto> getProfile(@PathVariable Long id) {
+        GetProfileWithFollowCountResponseDto responseDto = profileService.getProfile(id);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
