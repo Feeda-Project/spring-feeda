@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -23,6 +26,7 @@ public class CommentService {
     private final PostRepository postRepository;
     private final ProfileRepository profileRepository;
 
+    @Transactional
     public CommentResponse createComment(Long postId, Long profileId, CreateCommentRequest request) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
@@ -31,6 +35,26 @@ public class CommentService {
 
         Comment comment = new Comment(post, profile, request.getContent());
         commentRepository.save(comment);
+        return CommentResponse.from(comment);
+    }
+
+    public List<CommentResponse> getCommentsByPostId(Long postId, String sort) {
+        List<Comment> comments;
+
+        if (sort.equalsIgnoreCase("oldest")) {
+            comments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
+        } else {
+            comments = commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
+        }
+
+        return comments.stream()
+                .map(CommentResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    public CommentResponse getCommentById(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "댓글이 존재하지 않습니다."));
         return CommentResponse.from(comment);
     }
 
