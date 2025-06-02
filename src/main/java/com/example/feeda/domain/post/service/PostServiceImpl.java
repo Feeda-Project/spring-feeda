@@ -13,7 +13,7 @@ import com.example.feeda.domain.post.repository.PostRepository;
 import com.example.feeda.domain.profile.entity.Profile;
 import com.example.feeda.domain.profile.repository.ProfileRepository;
 import com.example.feeda.security.jwt.JwtPayload;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -107,7 +107,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponseDto> findAll(Pageable pageable, String keyword,
-        LocalDateTime startUpdatedAt, LocalDateTime endUpdatedAt) {
+        LocalDate startUpdatedAt, LocalDate endUpdatedAt) {
 
         if ((startUpdatedAt == null && endUpdatedAt != null) || (startUpdatedAt != null
             && endUpdatedAt == null)) {
@@ -118,7 +118,7 @@ public class PostServiceImpl implements PostService {
 
         if (startUpdatedAt != null) {
             return postRepository.findAllByTitleContainingAndUpdatedAtBetween(
-                    keyword, startUpdatedAt, endUpdatedAt, pageable)
+                    keyword, startUpdatedAt.atStartOfDay(), endUpdatedAt.atTime(23, 59, 59), pageable)
                 .map(post -> PostResponseDto.toDto(post, postLikeRepository.countByPost(post),
                     commentRepository.countByPost(post)));
         }
