@@ -13,7 +13,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
-
 @Getter
 @Entity
 @Table(name = "posts")
@@ -39,6 +38,12 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "profile_id")
     private Profile profile;
 
+    public void update(String title, String content, String category) {
+        this.title = title;
+        this.content = content;
+        this.category = category;
+    }
+
     public Post(String title, String content, String category, Profile profile) {
         this.title = title;
         this.content = content;
@@ -47,13 +52,5 @@ public class Post extends BaseEntity {
     }
 
     protected Post() {
-
     }
-
-    public void update(String title, String content, String category) {
-        this.title = title;
-        this.content = content;
-        this.category = category;
-    }
-
 }
