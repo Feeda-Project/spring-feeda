@@ -23,10 +23,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -55,12 +53,12 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public PostLikeResponseDTO makeLikes(Long id, JwtPayload jwtPayload) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
-        Profile profile = profileRepository.findById(jwtPayload.getProfileId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "프로필이 존재하지 않습니다."));
+        Post post = postRepository.findById(id).orElseThrow(() -> new CustomResponseException(ResponseError.POST_NOT_FOUND));
+        Profile profile = profileRepository.findById(jwtPayload.getProfileId()).orElseThrow(() -> new CustomResponseException(ResponseError.PROFILE_NOT_FOUND));
 
         // 중복 좋아요 방지
         postLikeRepository.findByPostAndProfile(post, profile).ifPresent(like -> {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 좋아요를 눌렀습니다.");
+            throw new CustomResponseException(ResponseError.ALREADY_LIKED_POST);
         });
 
         PostLike savePost = postLikeRepository.save(new PostLike(post, profile));
@@ -71,13 +69,13 @@ public class PostServiceImpl implements PostService {
     @Override
     public void deleteLikes(Long id, Long profileId) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomResponseException(ResponseError.POST_NOT_FOUND));
 
         Profile profile = profileRepository.findById(profileId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 프로필"));
+                .orElseThrow(() -> new CustomResponseException(ResponseError.PROFILE_NOT_FOUND));
 
         PostLike postLike = postLikeRepository.findByPostAndProfile(post, profile)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 사용자의 좋아요가 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomResponseException(ResponseError.NOT_YET_LIKED_POST));
 
         postLikeRepository.delete(postLike);
     }

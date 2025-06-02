@@ -23,9 +23,10 @@ public enum ResponseError {
     // 게시글 관련 오류
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다"),
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글이 존재하지 않습니다"),
+    ALREADY_LIKED_POST(HttpStatus.BAD_REQUEST, "이미 좋아요한 게시글 입니다."),
+    NOT_YET_LIKED_POST(HttpStatus.BAD_REQUEST, "아직 좋아요 하지 않은 게시글 입니다."),
     ALREADY_LIKED_COMMENT(HttpStatus.BAD_REQUEST, "이미 좋아요한 댓글입니다."),
-    NOT_YET_LIKED_COMMENT(HttpStatus.BAD_REQUEST, "아직 좋아요하지 않은 댓글 입니다."),
-
+    NOT_YET_LIKED_COMMENT(HttpStatus.BAD_REQUEST, "아직 좋아요 하지 않은 댓글 입니다."),
 
     // 페이징 관련 오류
     INVALID_PAGINATION_PARAMETERS(HttpStatus.BAD_REQUEST, "페이지 번호는 1 이상, 페이지 크기는 1 이상이어야 합니다."),
@@ -33,8 +34,6 @@ public enum ResponseError {
     // 권한 관련 오류
     NO_PERMISSION_TO_EDIT(HttpStatus.FORBIDDEN, "수정 권한이 없습니다."),
     NO_PERMISSION_TO_DELETE(HttpStatus.FORBIDDEN, "삭제 권한이 없습니다.");
-
-
 
     private final HttpStatus httpStatus;
     private final String message;
