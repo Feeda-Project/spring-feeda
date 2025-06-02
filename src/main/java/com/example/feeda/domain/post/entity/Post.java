@@ -47,7 +47,6 @@ public class Post extends BaseEntity {
     }
 
     protected Post() {
-
     }
 
     public void update(String title, String content, String category) {
@@ -55,5 +54,4 @@ public class Post extends BaseEntity {
         this.content = content;
         this.category = category;
     }
-
 }
