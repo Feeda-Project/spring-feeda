@@ -1,4 +1,4 @@
-package com.example.feeda.domain.account;
+package com.example.feeda.domain.account.repository;
 
 import com.example.feeda.domain.account.entity.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
