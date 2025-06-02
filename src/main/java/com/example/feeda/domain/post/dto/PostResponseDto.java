@@ -7,6 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 public class PostResponseDto {
 
@@ -18,14 +20,23 @@ public class PostResponseDto {
 
     private final String category;
 
-    public PostResponseDto(Long id, String title, String content, String category) {
-        this.id = id;
-        this.title = title;
-        this.content = content;
-        this.category = category;
+    private final Long likes;
+
+    private final LocalDateTime createdAt;
+
+    private final LocalDateTime updatedAt;
+
+    public PostResponseDto(Post post, Long likes) {
+        this.id = post.getId();
+        this.title = post.getTitle();
+        this.content = post.getContent();
+        this.category = post.getCategory();
+        this.likes = likes;
+        this.createdAt = post.getCreatedAt();
+        this.updatedAt = post.getUpdatedAt();
     }
 
-    public static PostResponseDto toDto(Post post) {
-        return new PostResponseDto(post.getId(), post.getTitle(), post.getContent(), post.getCategory());
+    public static PostResponseDto toDto(Post post, Long likes) {
+        return new PostResponseDto(post, likes);
     }
 }

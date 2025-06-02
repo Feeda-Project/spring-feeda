@@ -1,5 +1,6 @@
 package com.example.feeda.domain.post.controller;
 
+import com.example.feeda.domain.post.dto.PostLikeResponseDTO;
 import com.example.feeda.domain.post.dto.PostRequestDto;
 import com.example.feeda.domain.post.dto.PostResponseDto;
 import com.example.feeda.domain.post.service.PostService;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
 @RestController
 @Validated
 @RequestMapping("/api/posts")
@@ -40,6 +42,26 @@ public class PostController {
         PostResponseDto post = postService.createPost(requestDto, jwtPayload);
 
         return new ResponseEntity<>(post, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{id}/likes")
+    public ResponseEntity<PostLikeResponseDTO> makeLikes(
+            @PathVariable Long id,
+            @AuthenticationPrincipal JwtPayload jwtPayload) {
+
+        Long profileId = jwtPayload.getProfileId();
+        return new ResponseEntity<>(postService.makeLikes(id, jwtPayload), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}/likes")
+    public ResponseEntity<Void> deleteLikes(
+            @PathVariable Long id,
+            @AuthenticationPrincipal JwtPayload jwtPayload
+    ) {
+        Long profileId = jwtPayload.getProfileId();
+        postService.deleteLikes(id, profileId);
+
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
