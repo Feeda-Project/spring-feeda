@@ -1,5 +1,6 @@
-package com.example.feeda.domain.account;
+package com.example.feeda.domain.account.controller;
 
+import com.example.feeda.domain.account.sevice.AccountService;
 import com.example.feeda.domain.account.dto.*;
 import com.example.feeda.security.jwt.JwtBlacklistService;
 import com.example.feeda.security.jwt.JwtPayload;

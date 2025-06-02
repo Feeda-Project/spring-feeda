@@ -1,10 +1,11 @@
-package com.example.feeda.domain.account;
+package com.example.feeda.domain.account.sevice;
 
 import com.example.feeda.domain.account.dto.LogInRequestDTO;
 import com.example.feeda.domain.account.dto.UpdatePasswordRequestDTO;
 import com.example.feeda.domain.account.dto.UserResponseDTO;
 import com.example.feeda.domain.account.dto.SignUpRequestDTO;
 import com.example.feeda.domain.account.entity.Account;
+import com.example.feeda.domain.account.repository.AccountRepository;
 import com.example.feeda.domain.profile.entity.Profile;
 import com.example.feeda.domain.profile.repository.ProfileRepository;
 import com.example.feeda.security.PasswordEncoder;
