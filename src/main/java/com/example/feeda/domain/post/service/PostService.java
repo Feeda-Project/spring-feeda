@@ -2,22 +2,23 @@ package com.example.feeda.domain.post.service;
 
 import com.example.feeda.domain.post.dto.PostRequestDto;
 import com.example.feeda.domain.post.dto.PostResponseDto;
-import com.example.feeda.domain.post.entity.Post;
+import com.example.feeda.security.jwt.JwtPayload;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 public interface PostService {
 
 
-    PostResponseDto createPost(String title, String content, String category);
+    PostResponseDto createPost(PostRequestDto postRequestDto,
+        JwtPayload jwtPayload);
 
     PostResponseDto findPostById(Long id);
 
     Page<PostResponseDto> findAll(Pageable pageable, String keyword);
 
-    Post updatePost(Long id, PostRequestDto requestDto);
+    Page<PostResponseDto> findFollowingAllPost(Pageable pageable, JwtPayload jwtPayload);
 
-    void deletePost(Long id);
+    PostResponseDto updatePost(Long id, PostRequestDto requestDto, JwtPayload jwtPayload);
+
+    void deletePost(Long id, JwtPayload jwtPayload);
 }
