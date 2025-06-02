@@ -1,11 +1,10 @@
 package com.example.feeda.domain.profile.service;
 
-import com.example.feeda.domain.profile.dto.GetProfileResponseDto;
-import com.example.feeda.domain.profile.dto.ProfileListResponseDto;
-import com.example.feeda.domain.profile.dto.UpdateProfileRequestDto;
-import com.example.feeda.domain.profile.dto.UpdateProfileResponseDto;
+import com.example.feeda.domain.follow.repository.FollowsRepository;
+import com.example.feeda.domain.profile.dto.*;
 import com.example.feeda.domain.profile.entity.Profile;
 import com.example.feeda.domain.profile.repository.ProfileRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,30 +17,32 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ProfileService {
-
     private final ProfileRepository profileRepository;
-
-    public ProfileService(ProfileRepository profileRepository) {
-        this.profileRepository = profileRepository;
-    }
+    private final FollowsRepository followsRepository;
 
     /**
      * 프로필 단건 조회 기능
      */
     @Transactional(readOnly = true)
-    public GetProfileResponseDto getProfile(Long id) {
+    public GetProfileWithFollowCountResponseDto getProfile(Long id) {
 
         Profile profile = profileRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "해당 회원을 찾을 수 없습니다."
                 ));
 
-        return GetProfileResponseDto.of(
+        Long followerCount = followsRepository.countByFollowings_Id(id);
+        Long followingCount = followsRepository.countByFollowers_Id(id);
+
+        return GetProfileWithFollowCountResponseDto.of(
                 profile.getId(),
                 profile.getNickname(),
                 profile.getBirth(),
                 profile.getBio(),
+                followerCount,
+                followingCount,
                 profile.getCreatedAt(),
                 profile.getUpdatedAt()
         );
