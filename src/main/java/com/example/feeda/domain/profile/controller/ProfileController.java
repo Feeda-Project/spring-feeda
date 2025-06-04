@@ -1,7 +1,7 @@
 package com.example.feeda.domain.profile.controller;
 
 import com.example.feeda.domain.profile.dto.*;
-import com.example.feeda.domain.profile.service.ProfileService;
+import com.example.feeda.domain.profile.service.ProfileServiceImpl;
 import com.example.feeda.security.jwt.JwtPayload;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class ProfileController {
 
-    private final ProfileService profileService;
+    private final ProfileServiceImpl profileService;
 
-    public ProfileController(ProfileService profileService) {
+    public ProfileController(ProfileServiceImpl profileService) {
         this.profileService = profileService;
     }
 

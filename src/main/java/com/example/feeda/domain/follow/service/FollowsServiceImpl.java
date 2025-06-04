@@ -7,6 +7,8 @@ import com.example.feeda.domain.profile.dto.GetProfileResponseDto;
 import com.example.feeda.domain.profile.dto.ProfileListResponseDto;
 import com.example.feeda.domain.profile.entity.Profile;
 import com.example.feeda.domain.profile.repository.ProfileRepository;
+import com.example.feeda.exception.CustomResponseException;
+import com.example.feeda.exception.enums.ResponseError;
 import com.example.feeda.security.jwt.JwtPayload;
 import java.util.List;
 import java.util.Optional;
@@ -14,10 +16,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Slf4j
@@ -38,8 +38,7 @@ public class FollowsServiceImpl implements FollowsService {
         Optional<Follows> follow =
             followsRepository.findByFollowersAndFollowings(myProfile, followingProfile);
         if (follow.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "이미 팔로우한 계정입니다.");
+            throw new CustomResponseException(ResponseError.ALREADY_FOLLOWED);
         }
 
         Follows newFollow = Follows.builder()
@@ -63,8 +62,7 @@ public class FollowsServiceImpl implements FollowsService {
         Optional<Follows> follows =
             followsRepository.findByFollowersAndFollowings(myProfile, followingProfile);
         if (follows.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "존재하지 않는 팔로우입니다.");
+            throw new CustomResponseException(ResponseError.FOLLOW_NOT_FOUND);
         }
 
         followsRepository.delete(follows.get());
@@ -131,8 +129,7 @@ public class FollowsServiceImpl implements FollowsService {
             profileRepository.findById(profileId);
 
         if (optionalProfile.isEmpty()) {
-            throw new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "존재하지 않는 프로필입니다. id = " + profileId);
+            throw new CustomResponseException(ResponseError.PROFILE_NOT_FOUND);
         }
 
         return optionalProfile.get();
@@ -140,8 +137,7 @@ public class FollowsServiceImpl implements FollowsService {
 
     private void validateNotSelf(Profile me, Long profileId) {
         if (me.getId().equals(profileId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "본인 프로필은 팔로우/언팔로우 할 수 없습니다");
+            throw new CustomResponseException(ResponseError.CANNOT_FOLLOW_SELF);
         }
     }
 }

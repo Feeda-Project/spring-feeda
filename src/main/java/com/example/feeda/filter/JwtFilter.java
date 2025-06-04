@@ -1,6 +1,7 @@
 package com.example.feeda.filter;
 
-import com.example.feeda.exception.JwtValidationException;
+import com.example.feeda.exception.enums.ServletResponseError;
+import com.example.feeda.exception.TokenNotFoundException;
 import com.example.feeda.security.jwt.JwtBlacklistService;
 import com.example.feeda.security.jwt.JwtPayload;
 import com.example.feeda.security.jwt.JwtUtil;
@@ -47,13 +48,13 @@ public class JwtFilter extends OncePerRequestFilter {
             // JWT 유효성 검사와 claims 추출
             Claims claims = jwtUtil.extractClaims(jwt);
             if (claims == null) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 JWT 토큰입니다.");
+                response.sendError(ServletResponseError.INVALID_JWT.getHttpStatus(), ServletResponseError.INVALID_JWT.getMessage());
                 return;
             }
 
             // 블랙리스트 검증
             if (jwtBlacklistService.isBlacklisted(jwt)) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "만료된 JWT 토큰입니다.");
+                response.sendError(ServletResponseError.EXPIRED_JWT_TOKEN.getHttpStatus(), ServletResponseError.EXPIRED_JWT_TOKEN.getMessage());
                 return;
             }
 
@@ -73,14 +74,14 @@ public class JwtFilter extends OncePerRequestFilter {
 
             chain.doFilter(request, response);
 
-        } catch (SecurityException | MalformedJwtException e) {
-            throw new JwtValidationException("유효하지 않는 JWT 서명입니다.", HttpServletResponse.SC_UNAUTHORIZED);
+        } catch (SecurityException | MalformedJwtException | TokenNotFoundException e) {
+            response.sendError(ServletResponseError.INVALID_JWT_SIGNATURE.getHttpStatus(), ServletResponseError.INVALID_JWT_SIGNATURE.getMessage());
         } catch (ExpiredJwtException e) {
-            throw new JwtValidationException("만료된 JWT 토큰입니다.", HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(ServletResponseError.EXPIRED_JWT_TOKEN.getHttpStatus(), ServletResponseError.EXPIRED_JWT_TOKEN.getMessage());
         } catch (UnsupportedJwtException e) {
-            throw new JwtValidationException("지원되지 않는 JWT 토큰입니다.", HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(ServletResponseError.UNSUPPORTED_JWT.getHttpStatus(), ServletResponseError.UNSUPPORTED_JWT.getMessage());
         } catch (Exception e) {
-            throw new JwtValidationException("내부 서버 오류", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.sendError(ServletResponseError.INTERNAL_SERVER_ERROR.getHttpStatus(), ServletResponseError.INTERNAL_SERVER_ERROR.getMessage());
         }
     }
 }

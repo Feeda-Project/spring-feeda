@@ -9,14 +9,13 @@ import com.example.feeda.domain.post.entity.Post;
 import com.example.feeda.domain.post.repository.PostRepository;
 import com.example.feeda.domain.profile.entity.Profile;
 import com.example.feeda.domain.profile.repository.ProfileRepository;
+import com.example.feeda.exception.CustomResponseException;
+import com.example.feeda.exception.enums.ResponseError;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,9 +28,9 @@ public class CommentService {
     @Transactional
     public CommentResponse createComment(Long postId, Long profileId, CreateCommentRequest request) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomResponseException(ResponseError.POST_NOT_FOUND));
         Profile profile = profileRepository.findById(profileId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomResponseException(ResponseError.PROFILE_NOT_FOUND));
 
         Comment comment = new Comment(post, profile, request.getContent());
         commentRepository.save(comment);
@@ -49,22 +48,22 @@ public class CommentService {
 
         return comments.stream()
                 .map(CommentResponse::from)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public CommentResponse getCommentById(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "댓글이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomResponseException(ResponseError.COMMENT_NOT_FOUND));
         return CommentResponse.from(comment);
     }
 
     @Transactional
     public CommentResponse updateComment(Long commentId, Long requesterProfileId, UpdateCommentRequest request) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "댓글이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomResponseException(ResponseError.COMMENT_NOT_FOUND));
 
         if (!comment.getProfile().getId().equals(requesterProfileId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인의 댓글만 수정할 수 있습니다.");
+            throw new CustomResponseException(ResponseError.NO_PERMISSION_TO_EDIT);
         }
 
         comment.updateContent(request.getContent());
@@ -74,13 +73,13 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long commentId, Long requesterProfileId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "댓글이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomResponseException(ResponseError.COMMENT_NOT_FOUND));
 
         Long authorId = comment.getProfile().getId();
         Long postOwnerId = comment.getPost().getProfile().getId();
 
         if (!authorId.equals(requesterProfileId) && !postOwnerId.equals(requesterProfileId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "삭제 권한이 없습니다.");
+            throw new CustomResponseException(ResponseError.NO_PERMISSION_TO_DELETE);
         }
 
         commentRepository.delete(comment);

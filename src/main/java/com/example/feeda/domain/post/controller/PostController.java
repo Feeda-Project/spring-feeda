@@ -51,7 +51,6 @@ public class PostController {
         @PathVariable Long id,
         @AuthenticationPrincipal JwtPayload jwtPayload) {
 
-        Long profileId = jwtPayload.getProfileId();
         return new ResponseEntity<>(postService.makeLikes(id, jwtPayload), HttpStatus.OK);
     }
 

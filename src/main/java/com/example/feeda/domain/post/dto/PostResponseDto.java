@@ -1,8 +1,9 @@
 package com.example.feeda.domain.post.dto;
 
 import com.example.feeda.domain.post.entity.Post;
-import java.time.LocalDateTime;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 @Getter
 public class PostResponseDto {
@@ -32,9 +33,5 @@ public class PostResponseDto {
         this.comments = comments;
         this.createdAt = post.getCreatedAt();
         this.updatedAt = post.getUpdatedAt();
-    }
-
-    public static PostResponseDto toDto(Post post, Long likes, Long comments) {
-        return new PostResponseDto(post, likes, comments);
     }
 }
