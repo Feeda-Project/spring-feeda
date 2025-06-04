@@ -5,6 +5,7 @@ import com.example.feeda.domain.post.dto.PostRequestDto;
 import com.example.feeda.domain.post.dto.PostResponseDto;
 import com.example.feeda.domain.post.service.PostService;
 import com.example.feeda.security.jwt.JwtPayload;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -38,7 +39,7 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<PostResponseDto> createPost(@RequestBody PostRequestDto requestDto,
+    public ResponseEntity<PostResponseDto> createPost(@RequestBody @Valid PostRequestDto requestDto,
         @AuthenticationPrincipal JwtPayload jwtPayload) {
 
         PostResponseDto post = postService.createPost(requestDto, jwtPayload);
