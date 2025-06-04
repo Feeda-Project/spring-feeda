@@ -27,7 +27,7 @@
 - Java 17
 - Gradle 8.5
 - Spring Boot 3.5.0
-- Spring Data JPA (Hibernate 6.6.13.Final)
+- Spring Data JPA (Hibernate 6.6.15.Final)
 - Spring Security
 - MySQL 8.0 이상
 - Redis Cloud
