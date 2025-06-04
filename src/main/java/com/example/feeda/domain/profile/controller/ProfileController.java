@@ -36,7 +36,7 @@ public class ProfileController {
     @GetMapping("/profiles")
     public ResponseEntity<ProfileListResponseDto> getProfiles(
             @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         ProfileListResponseDto response = profileService.getProfiles(keyword, page, size);

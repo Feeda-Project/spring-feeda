@@ -27,11 +27,11 @@ public class CommentController {
     private final CommentService commentService;
 
     // 댓글 작성
-    @PostMapping("/comments/posts/{postId}")
+    @PostMapping("/comments/post/{postId}")
     public ResponseEntity<CommentResponse> createComment(
             @PathVariable Long postId,
             @AuthenticationPrincipal JwtPayload jwtPayload,
-            @RequestBody CreateCommentRequest request
+            @RequestBody @Valid CreateCommentRequest request
     ) {
         Long profileId = jwtPayload.getProfileId();
         CommentResponse response = commentService.createComment(postId, profileId, request);
@@ -39,7 +39,7 @@ public class CommentController {
     }
 
     // 댓글 전체 조회 (게시글 기준, 정렬/필터 가능)
-    @GetMapping("/comments/posts/{postId}")
+    @GetMapping("/comments/post/{postId}")
     public ResponseEntity<List<CommentResponse>> getCommentsByPostId(
             @PathVariable Long postId,
             @RequestParam(defaultValue = "latest") String sort // latest 또는 oldest
