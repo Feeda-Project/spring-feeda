@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
         body.put("timestamp", LocalDateTime.now());
         body.put("status", ex.getHttpStatus().value());
         body.put("error", ex.getHttpStatus().getReasonPhrase());
-        body.put("message", ex.getMessage());
+        body.put("message", ex.getErrorMessage());
         body.put("path", request.getRequestURI());
 
         return new ResponseEntity<>(body, ex.getHttpStatus());
