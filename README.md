@@ -29,7 +29,7 @@
 - Spring Boot 3.5.0
 - Spring Data JPA (Hibernate 6.6.15.Final)
 - Spring Security
-- MySQL 8.0 이상
+- MySQL 8.0+
 - Redis Cloud
 
 <br>
@@ -93,10 +93,39 @@ src
 
 <br>
 
-## 🔍 새로운 지식
+## 빌드 과정
+### 코드 복제
+```bash
+git clone https://github.com/Feeda-Project/spring-feeda.git
+cd spring-feeda
+```
 
+### 빌드 (윈도우)
+```bash
+./gradlew build
+```
+
+### 실행 (윈도우)
+```bash
+java -jar .\build\libs\feeda-0.0.1-SNAPSHOT.jar
+```
+
+<details>
+<summary>환경 변수 설정</summary>
+
+[Feeda 프로젝트 환경 변수](https://www.notion.so/Feed-a-208bfc0be30d8043a8b3e2f548012b9a?source=copy_link)
+</details>
+
+
+<br>
+
+## 🔍 새로운 지식
+- [.github 디렉토리](https://gajicoding.tistory.com/359)
+- [Spring Boot 프로젝트에서 Redis 연동 하기](https://gajicoding.tistory.com/357)
+
+<br>
 
 ## 🧰 문제 해결 (트러블 슈팅)
-
-
-
+- [Spring Security 에러 핸들링 오류 해결, /error 접근 권한 문제](https://gajicoding.tistory.com/356)
+- [@ControllerAdvice가 Filter 예외를 잡지 못하는 문제 해결](https://gajicoding.tistory.com/358)
+- [Spring Boot JWT 인증 & 프로필 관리 트러블슈팅 가이드](https://che01.tistory.com/52)
